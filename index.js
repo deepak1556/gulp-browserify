@@ -5,13 +5,13 @@ var browserify = require('browserify');
 var path = require('path');
 
 function error(str) {
-	gutil.log('gulp-browserify: ', gutil.colors.red(err));
+	gutil.log('gulp-browserify: ', gutil.colors.red(str));
 }
 
 module.exports = function(opts) {
-	var opts = opts || {};
-	var buffer = '';
-	var bundler;
+    var opts = opts || {};
+    var buffer = '';
+    var bundler;
 
     return es.map(function (file, cb) {
         try {
