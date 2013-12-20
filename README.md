@@ -19,7 +19,7 @@ var concat = require('gulp-concat');
 
 gulp.task('scripts', function() {
 	//bundle all scripts ignoring vendor scripts
-	gulp.src(['./src/**/*.js', '!./src/vendor/**'])
+	gulp.src(['src/**/*.js', '!src/vendor/**'])
 		.pipe(browserify({
 		  insertGlobals : true,
 		  debug : true
