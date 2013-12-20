@@ -18,8 +18,12 @@ var browserify = require('gulp-browserify');
 var concat = require('gulp-concat');
 
 gulp.task('scripts', function() {
-	gulp.src(['./src/index.js'])
-		.pipe(browserify())
+	//bundle all scripts ignoring vendor scripts
+	gulp.src(['./src/**/*.js', '!./src/vendor/**'])
+		.pipe(browserify({
+		  insertGlobals : true,
+		  debug : true
+		}))
 		.pipe(concat('dest.js'))
 		.pipe(gulp.dest('./build'))
 });
