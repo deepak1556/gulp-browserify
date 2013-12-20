@@ -10,7 +10,7 @@ function error(str) {
 
 module.exports = function(opts) {
     var ctrOpts = {};
-	var bundler;
+    var bundler;
 
     return es.map(function (file, cb) {
         try {
