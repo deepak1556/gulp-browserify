@@ -6,7 +6,7 @@
   "repository": "https://github.com/deepak1556/gulp-browserify",
   "author": "Robo <hop2deep@gmail.com>",
   "dependencies": {
-    "browserify": "~3.4.0",
+    "browserify": "~3.4.1",
     "event-stream": "~3.0.20",
     "gulp-util": "~2.1.4",
     "gulp-concat": "~2.1.2"

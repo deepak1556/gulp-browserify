@@ -10,7 +10,6 @@ function error(str) {
 
 module.exports = function(opts) {
     var ctrOpts = {};
-	var buffer = '';
 	var bundler;
 
     return es.map(function (file, cb) {
@@ -35,7 +34,7 @@ module.exports = function(opts) {
                     bundler.transform(transform);
                 })
             }
-            
+
             if(opts.preBundleCB) {
                 opts.preBundleCB(bundler);
             }
