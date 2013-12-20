@@ -9,6 +9,7 @@ function error(str) {
 }
 
 module.exports = function(opts) {
+    var opts = opts || {};
     var ctrOpts = {};
     var bundler;
 
