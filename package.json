@@ -6,10 +6,12 @@
   "repository": "https://github.com/deepak1556/gulp-browserify",
   "author": "Robo <hop2deep@gmail.com>",
   "dependencies": {
-    "browserify": "~3.4.1",
-    "event-stream": "~3.0.20",
-    "gulp-util": "~2.1.4",
-    "gulp-concat": "~2.1.2"
+    "browserify": "~3.14.0",
+    "event-stream": "*",
+    "gulp-util": "~2.2.0",
+    "gulp-concat": "~2.1.4",
+    "mocha": "~1.15.1",
+    "gulp": "~3.1.4"
   },
   "main": "index.js",
   "engines": {
@@ -25,6 +27,7 @@
   },
   "keywords": [
     "gulpplugin",
+    "gulpfriendly",
     "browserify"
   ]
 }

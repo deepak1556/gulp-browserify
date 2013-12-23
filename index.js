@@ -3,6 +3,9 @@ var es = require('event-stream');
 var gutil = require('gulp-util');
 var browserify = require('browserify');
 var path = require('path');
+var fs = require('fs');
+var isStream = gutil.isStream;
+var isBuffer = gutil.isBuffer;
 
 function error(str) {
 	gutil.log('gulp-browserify: ', gutil.colors.red(str));
@@ -11,11 +14,28 @@ function error(str) {
 module.exports = function(opts) {
     var opts = opts || {};
     var ctrOpts = {};
-    var bundler;
+    var buffer = [];
+    var bundler, chunk = '';
+    var itsABuffer = false;
+    var itsAStream = false;
 
     return es.map(function (file, cb) {
         try {
-            ctrOpts.entries = path.resolve(file.path);
+            if(isStream(file.contents)) {
+
+                itsAStream = true;
+                ctrOpts.basedir = file.base;
+                ctrOpts.entries = file.contents;
+            }else if(isBuffer(file.contents)) {
+
+                itsABuffer = true;
+                ctrOpts.basedir = file.base;
+                buffer.push(file.contents);
+                ctrOpts.entries = es.readArray(buffer);
+            }else {
+
+                ctrOpts.entries = path.resolve(file.path);
+            }
 
             if(opts.noParse) {
                 ctrOpts.noParse = opts.noParse.map(function(filepath) {
@@ -54,14 +74,28 @@ module.exports = function(opts) {
                 cb(null, newFile)
             }
 
-            bundler.bundle(opts, function(err, src) {
-                if(opts.postBundleCB) {
-                    opts.postBundleCB(err, src, onBundleComplete)
-                }
-                else {
-                    onBundleComplete(err, src);
-                }
-            })
+            if(itsAStream || itsABuffer ) {
+                var readable = bundler.bundle(opts);
+                readable.on('data', function(data) {
+                    chunk += data;
+                }).once('end', function(err) {
+                    if(opts.postBundleCB) {
+                        opts.postBundleCB(err, chunk, onBundleComplete)
+                    }
+                    else {
+                        onBundleComplete(err, chunk);
+                    }
+                })
+            } else {
+                bundler.bundle(opts, function(err, src) {
+                    if(opts.postBundleCB) {
+                        opts.postBundleCB(err, src, onBundleComplete)
+                    }
+                    else {
+                        onBundleComplete(err, src);
+                    }
+                })
+            }
         } catch (err) {
             error(err.message);
         }
