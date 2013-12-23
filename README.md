@@ -33,6 +33,8 @@ gulp.task('default', function() {
 });
 ```
 
+*Note* : Supports streams too, pass `{buffer : false}` as option to `gulp.src()`
+
 ### Options
 
 #### noParse
