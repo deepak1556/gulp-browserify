@@ -68,6 +68,7 @@ module.exports = function(opts) {
                 var newFile = new gutil.File({
                     cwd: file.cwd,
                     base: file.base,
+                    path: file.path,
                     contents: new Buffer(src)
                 });
 
