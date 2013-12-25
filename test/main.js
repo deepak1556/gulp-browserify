@@ -34,4 +34,17 @@ describe('gulp-browserify', function() {
 			done();
 		})
 	})
+	it('should use the gulp version of the file', function(done) {
+		gulp.src(testFile)
+			.pipe(es.map(function(file, cb) {
+				file.contents = new Buffer('var abc=123;');
+				cb(null, file);
+			}))
+			.pipe(gulpB())
+			.pipe(es.map(function(file) {
+				expect(file.contents.toString()).to.not.equal(fileContents.toString());
+				expect(file.contents.toString()).to.match(/var abc=123;/);
+				done();
+			}))
+	})
 })
