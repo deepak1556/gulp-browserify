@@ -64,18 +64,20 @@ Type : `Boolean`
 
 Enable source map support
 
-#### preBundleCB
-
-Type : `Function(b)`
-
-An optional callback function, that will be called before bundle completion. b is the browerify instance that will output the bundle.
-
-#### postBundleCB
-
-Type : `Function(err, src, next)`
-
-An optional callback function, which will be called after bundle completion and before writing of the bundle. The err and src arguments are provided directly from browserify. The `next` callback should be called with `(err, modifiedSrc);` the `modifiedSrc` is what will be written to the output file.
-
 #### Other Options
 
 Any other options you provide will be passed through to browserify. This is useful for setting things like `standalone` or `ignoreGlobals`.
+
+### Events
+
+#### prebundle
+
+`.on('prebundle', function(bundler){})`
+
+Event triggered just before invoking `bundler.bundle()` and provides bundler object to work with in the callback.
+
+#### postbundle
+
+`.on('postbundle', function(src){})`
+
+Event triggered after the bundle process is over and provides the bundled data as arguemnt to the callback.
