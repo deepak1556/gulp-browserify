@@ -15,89 +15,93 @@ module.exports = function(opts) {
     var opts = opts || {};
     var ctrOpts = {};
     var buffer = [];
+    var temp = [];
     var bundler, chunk = '';
     var itsABuffer = false;
     var itsAStream = false;
 
-    return es.map(function (file, cb) {
-        try {
-            if(isStream(file.contents)) {
+    function bufferContents(file) {
+    	buffer.push(file);
+    }
 
-                itsAStream = true;
-                ctrOpts.basedir = file.base;
-                ctrOpts.entries = file.contents;
-            }else if(isBuffer(file.contents)) {
+    function endStream() {
+    	if (buffer.length === 0) return this.emit('end');
 
-                itsABuffer = true;
-                ctrOpts.basedir = file.base;
-                buffer.push(file.contents);
-                ctrOpts.entries = es.readArray(buffer);
-            }else {
+    	var self = this;
 
-                ctrOpts.entries = path.resolve(file.path);
-            }
+    	 buffer.map(function (file) {
+        	try {
+            	if(isStream(file.contents)) {
 
-            if(opts.noParse) {
-                ctrOpts.noParse = opts.noParse.map(function(filepath) {
-                    return path.resolve(filepath);
-                })
-                delete opts.noParse;
-            }
+                	itsAStream = true;
+               		ctrOpts.basedir = file.base;
+                	ctrOpts.entries = file.contents;
+            	}else if(isBuffer(file.contents)) {
 
-            bundler = browserify(ctrOpts);
-            bundler.on('error', function(err) {
-                error(err);
-            })
+                	itsABuffer = true;
+                	ctrOpts.basedir = file.base;
+                	temp.push(file.contents);
+                	ctrOpts.entries = es.readArray(temp);
+            	}else {
 
-            if(opts.transform) {
-                opts.transform.forEach(function(transform) {
-                    console.log(file.path);
-                    bundler.transform(transform);
-                })
-            }
+                	ctrOpts.entries = path.resolve(file.path);
+            	}
 
-            if(opts.preBundleCB) {
-                opts.preBundleCB(bundler);
-            }
+            	if(opts.noParse) {
+                	ctrOpts.noParse = opts.noParse.map(function(filepath) {
+                    	return path.resolve(filepath);
+                	})
+                	delete opts.noParse;
+            	}
 
-            var onBundleComplete = function(err, src) {
-                if(err) {
-                    error(err);
-                }
+            	bundler = browserify(ctrOpts);
+            	bundler.on('error', function(err) {
+                	error(err);
+            	})
 
-                var newFile = new gutil.File({
-                    cwd: file.cwd,
-                    base: file.base,
-                    contents: new Buffer(src)
-                });
+            	if(opts.transform) {
+                	opts.transform.forEach(function(transform) {
+                    	console.log(file.path);
+                    	bundler.transform(transform);
+                	})
+            	}
 
-                cb(null, newFile)
-            }
+            	self.emit('prebundle', bundler);
 
-            if(itsAStream || itsABuffer ) {
-                var readable = bundler.bundle(opts);
-                readable.on('data', function(data) {
-                    chunk += data;
-                }).once('end', function(err) {
-                    if(opts.postBundleCB) {
-                        opts.postBundleCB(err, chunk, onBundleComplete)
-                    }
-                    else {
-                        onBundleComplete(err, chunk);
-                    }
-                })
-            } else {
-                bundler.bundle(opts, function(err, src) {
-                    if(opts.postBundleCB) {
-                        opts.postBundleCB(err, src, onBundleComplete)
-                    }
-                    else {
-                        onBundleComplete(err, src);
-                    }
-                })
-            }
-        } catch (err) {
-            error(err.message);
-        }
-    });
+            	var onBundleComplete = function(self, err, src) {
+                	if(err) {
+                    	error(err);
+                	}
+
+                	var newFile = new gutil.File({
+                    	cwd: file.cwd,
+                    	base: file.base,
+                    	contents: new Buffer(src)
+                	});
+
+                	self.emit('postbundle', src);
+
+                	self.emit('data', newFile);
+                	self.emit('end');
+            	}
+
+            	if(itsAStream || itsABuffer ) {
+                	var readable = bundler.bundle(opts);
+                	readable.on('data', function(data) {
+                    	chunk += data;
+                	}).once('end', function(err) {
+                    	onBundleComplete(self, err, chunk);
+                	})
+            	} else {
+                	bundler.bundle(opts, function(err, src) {
+                    	onBundleComplete(self, err, src);
+                	})
+            	}
+        	} catch (err) {
+            	error(err.message);
+        	}
+    	});
+	}
+
+	return es.through(bufferContents, endStream);
 }

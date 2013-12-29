@@ -5,6 +5,8 @@ var es = require('event-stream');
 var path = require('path');
 var browserify = require('browserify');
 
+var postdata;
+
 describe('gulp-browserify', function() {
 	var testFile = path.join(__dirname, './test.js');
 	var fileContents;
@@ -12,6 +14,9 @@ describe('gulp-browserify', function() {
 	beforeEach(function(done) {
 		gulp.src(testFile)
 			.pipe(gulpB())
+			.on('postbundle', function(data) {
+				postdata = data;
+			})
 			.pipe(es.map(function(file){
 				fileContents = file.contents;
 				done();
@@ -33,5 +38,10 @@ describe('gulp-browserify', function() {
 			expect(fileContents.toString()).to.equal(chunk);
 			done();
 		})
+	})
+
+	it('should emit postbundle event', function(done) {
+		expect(fileContents.toString()).to.equal(postdata);
+		done();
 	})
 })
