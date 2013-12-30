@@ -4,22 +4,21 @@ var browserify = require('browserify');
 var path = require('path');
 
 
-
-function error(str) {
-  gutil.log('gulp-browserify: ', gutil.colors.red(str));
-}
-
 module.exports = function(opts) {
   var opts = opts || {};
   var ctrOpts = {};
   var buffer = [];
   var temp = [];
-  var bundler;
+  var bundler, chunk = '';
 
+  function bufferContents(file) {
+    buffer.push(file);
+  }
+  function endStream(cb) {
+    if (buffer.length === 0) return this.emit('end');
+    var self = this;
 
-  function browserifyStream(file, cb) {
-
-
+    buffer.map(function (file) {
       if (gutil.isNull(file.contents)) return cb(null, file); // pass along
       if (gutil.isStream(file.contents)) {
         ctrOpts.basedir = file.base;
@@ -30,43 +29,42 @@ module.exports = function(opts) {
         ctrOpts.basedir = file.base;
         temp.push(file.contents);
         ctrOpts.entries = es.readArray(temp);
-      }else {
-        ctrOpts.entries = path.resolve(file.path);
-      }
-
-      if(opts.noParse) {
-        ctrOpts.noParse = opts.noParse.map(function(filepath) {
-          return path.resolve(filepath);
-        });
-        delete opts.noParse;
       }
 
       bundler = browserify(ctrOpts);
-      bundler.on('error', function(err) {
-        error(err);
-      });
+      bundler.on('error', cb);
 
       if(opts.transform) {
-        opts.transform.forEach(function(transform) {
-          console.log(file.path);
-          bundler.transform(transform);
-        });
+        opts.transform.forEach(bundler.transform);
       }
 
-      
+      self.emit('prebundle', bundler);
 
-      var onBundleComplete = function(err, src) {
-        if(err) {
-          error(err);
-        }
-        file.contents = new Buffer(src);
-        cb(null, file);
+      var onBundleComplete = function( self, err, src) {
+        if(err) return err;
+
+        var newFile = new gutil.File({
+          cwd: file.cwd,
+          base: file.base,
+          contents: new Buffer(src)
+        });
+
+        self.emit('postbundle', src);
+
+        self.emit('data', newFile);
+        self.emit('end');
       };
 
-
-      bundler.bundle(opts, function(err, src) {
-        onBundleComplete(err, src);
+      var readable = bundler.bundle(opts);
+        readable.on('data', function(data) {
+          chunk += data;
+        }).once('end', function(err) {
+          onBundleComplete(self, err, chunk);
       });
-    }
-  return es.map(browserifyStream);
+
+
+
+    });
+  }
+  return es.through(bufferContents, endStream);
 };
