@@ -14,13 +14,8 @@ module.exports = function(opts) {
   var ctrOpts = {};
   var buffer = [];
   var temp = [];
-  var bundler, chunk = '';
-  var itsABuffer = false;
-  var itsAStream = false;
+  var bundler;
 
-  function bufferContents(file) {
-    buffer.push(file);
-  }
 
   function browserifyStream(file, cb) {
 
