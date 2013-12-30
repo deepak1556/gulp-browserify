@@ -5,11 +5,11 @@ var path = require('path');
 
 
 module.exports = function(opts) {
-  var opts = opts || {};
+  if(!opts) opts = {};
   var ctrOpts = {};
   var buffer = [];
   var temp = [];
-  var bundler, chunk = '';
+  var bundler = '';
 
   function bufferContents(file) {
     buffer.push(file);
@@ -41,9 +41,7 @@ module.exports = function(opts) {
 
       self.emit('prebundle', bundler);
 
-      var onBundleComplete = function(self, err, src) {
-        if(err) return err;
-
+      bundler.bundle(opts).pipe(es.wait(function(err, src){
         var newFile = new gutil.File({
           cwd: file.cwd,
           base: file.base,
@@ -53,16 +51,8 @@ module.exports = function(opts) {
         self.emit('postbundle', src);
         self.emit('data', newFile);
         self.emit('end');
-      };
-
-      var readable = bundler.bundle(opts);
-      readable.on('data', function(data) {
-        chunk += data;
-      }).once('end', function(err) {
-        onBundleComplete(self, err, chunk);
-      });
-      
+      }));
     });
   }
-    return es.through(bufferContents, endStream);
+  return es.through(bufferContents, endStream);
 };
