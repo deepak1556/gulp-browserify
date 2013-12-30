@@ -14,25 +14,26 @@ module.exports = function(opts) {
   function bufferContents(file) {
     buffer.push(file);
   }
-  function endStream(cb) {
+
+  function endStream() {
     if (buffer.length === 0) return this.emit('end');
     var self = this;
 
     buffer.map(function (file) {
       if (gutil.isNull(file.contents)) return cb(null, file); // pass along
       if (gutil.isStream(file.contents)) {
-        ctrOpts.basedir = file.base;
         ctrOpts.entries = file.contents;
       }
       if(gutil.isBuffer(file.contents)) {
-
-        ctrOpts.basedir = file.base;
         temp.push(file.contents);
         ctrOpts.entries = es.readArray(temp);
       }
+      ctrOpts.basedir = file.base;
 
       bundler = browserify(ctrOpts);
-      bundler.on('error', cb);
+      bundler.on('error', function(){
+        throw err;
+      });
 
       if(opts.transform) {
         opts.transform.forEach(bundler.transform);
@@ -40,7 +41,7 @@ module.exports = function(opts) {
 
       self.emit('prebundle', bundler);
 
-      var onBundleComplete = function( self, err, src) {
+      var onBundleComplete = function(self, err, src) {
         if(err) return err;
 
         var newFile = new gutil.File({
@@ -50,21 +51,18 @@ module.exports = function(opts) {
         });
 
         self.emit('postbundle', src);
-
         self.emit('data', newFile);
         self.emit('end');
       };
 
       var readable = bundler.bundle(opts);
-        readable.on('data', function(data) {
-          chunk += data;
-        }).once('end', function(err) {
-          onBundleComplete(self, err, chunk);
+      readable.on('data', function(data) {
+        chunk += data;
+      }).once('end', function(err) {
+        onBundleComplete(self, err, chunk);
       });
-
-
-
+      
     });
   }
-  return es.through(bufferContents, endStream);
+    return es.through(bufferContents, endStream);
 };

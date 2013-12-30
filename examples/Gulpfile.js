@@ -4,7 +4,7 @@ var concat = require('gulp-concat');
 
 gulp.task('scripts', function(){
   //single entry point to browserify
-  gulp.src('./src/index.js')
+  gulp.src('./src/*.js')
   .pipe(browserify({
     insertGlobals : true,
     debug : true

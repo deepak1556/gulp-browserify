@@ -21,6 +21,7 @@
   "devDependencies": {
     "mocha": "~1.15.1",
     "chai": "~1.8.1",
+    "should":"*",
     "gulp": "~3.1.4"
   },
   "keywords": [

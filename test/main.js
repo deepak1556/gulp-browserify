@@ -60,4 +60,3 @@ describe('gulp-browserify', function() {
 			}));
 	});
 });
-

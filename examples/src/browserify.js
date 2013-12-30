@@ -1,0 +1,1 @@
+var browserify = require("browserify");
