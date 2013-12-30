@@ -11,9 +11,6 @@ module.exports = function(opts) {
   var temp = [];
   var bundler = '';
 
-  function bufferContents(file) {
-    buffer.push(file);
-  }
 
   function endStream() {
     if (buffer.length === 0) return this.emit('end');
@@ -54,5 +51,5 @@ module.exports = function(opts) {
       }));
     });
   }
-  return es.through(bufferContents, endStream);
+  return es.through(buffer.push.bind(buffer), endStream);
 };
