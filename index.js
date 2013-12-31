@@ -28,9 +28,7 @@ module.exports = function(opts) {
       ctrOpts.basedir = file.base;
 
       bundler = browserify(ctrOpts);
-      bundler.on('error', function(){
-        throw err;
-      });
+      bundler.on('error', self.emit.bind(this, 'error'));
 
       if(opts.transform) {
         opts.transform.forEach(bundler.transform);
