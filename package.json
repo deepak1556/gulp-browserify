@@ -1,6 +1,6 @@
 {
   "name": "gulp-browserify",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Bundle modules with Browserify",
   "license": "MIT",
   "repository": "https://github.com/deepak1556/gulp-browserify",
@@ -16,7 +16,7 @@
     "node": ">= 0.6"
   },
   "scripts": {
-    "test": "mocha --timeout=4000"
+    "test": "mocha --timeout=6000"
   },
   "devDependencies": {
     "mocha": "~1.15.1",
