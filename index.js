@@ -1,42 +1,37 @@
 var es = require('event-stream');
 var gutil = require('gulp-util');
 var browserify = require('browserify');
-var path = require('path');
 
 
 module.exports = function(opts) {
   if(!opts) opts = {};
-  var ctrOpts = {};
+  var data = {};
   var buffer = [];
   var temp = [];
   var bundler = '';
 
 
-  function endStream() {
+  function bundleBrowserify() {
     if (buffer.length === 0) return this.emit('end');
     var self = this;
 
     buffer.map(function (file) {
-      if (gutil.isNull(file.contents)) return cb(null, file); // pass along
-      if (gutil.isStream(file.contents)) {
-        ctrOpts.entries = file.contents;
-      }
-      if(gutil.isBuffer(file.contents)) {
-        temp.push(file.contents);
-        ctrOpts.entries = es.readArray(temp);
-      }
-      ctrOpts.basedir = file.base;
+      if (file.isNull) return cb(null, file); // pass along
+      if (file.isStream) return cb(new Error('Streams not supported'));
 
-      bundler = browserify(ctrOpts);
+      temp.push(file.contents);
+      data.entries = es.readArray(temp);
+      data.basedir = file.base;
+
+      bundler = browserify(data);
       bundler.on('error', self.emit.bind(this, 'error'));
 
-      if(opts.transform) {
-        opts.transform.forEach(bundler.transform);
-      }
+      if(opts.transform) opts.transform.forEach(bundler.transform);
 
       self.emit('prebundle', bundler);
-
-      bundler.bundle(opts).pipe(es.wait(function(err, src){
+      
+      var bStream = bundler.bundle(opts);
+      bStream.pipe(es.wait(function(err, src){
         var newFile = new gutil.File({
           cwd: file.cwd,
           base: file.base,
@@ -49,5 +44,5 @@ module.exports = function(opts) {
       }));
     });
   }
-  return es.through(buffer.push.bind(buffer), endStream);
+  return es.through(buffer.push.bind(buffer), bundleBrowserify);
 };

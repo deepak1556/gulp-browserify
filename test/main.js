@@ -1,14 +1,20 @@
-var gulp = require('gulp');
-var gulpB = require('../');
-var expect = require('chai').expect;
-var es = require('event-stream');
+var fs = require('fs');
 var path = require('path');
+
+var gulp = require('gulp');
+var gutil = require('gulp-util');
+var concat = require('gulp-concat');
+var should = require('should');
+var es = require('event-stream');
 var browserify = require('browserify');
+
+var gulpB = require('../');
 
 var postdata;
 
 describe('gulp-browserify', function() {
 	var testFile = path.join(__dirname, './test.js');
+	var expectedOutput = fs.readFileSync(path.join(__dirname,'./fixtures/expected.js'), 'utf8');
 	var fileContents;
 
 	beforeEach(function(done) {
@@ -24,7 +30,7 @@ describe('gulp-browserify', function() {
 	});
 
 	it('should return a buffer', function(done) {
-		expect(fileContents).to.be.an.instanceof(Buffer);
+		(fileContents).should.be.an.instanceof(Buffer);
 		done();
 	});
 	
@@ -35,18 +41,18 @@ describe('gulp-browserify', function() {
 		b.bundle().on('data', function(data) {
 			chunk += data;
 		}).on('end', function() {
-			expect(fileContents.toString()).to.equal(chunk);
+			String(fileContents.toString()).should.equal(chunk);
 			done();
 		});
 	});
 
 
 	it('should emit postbundle event', function(done) {
-		expect(fileContents.toString()).to.equal(postdata);
+		String(fileContents.toString()).should.equal(postdata);
 		done();
 	});
 
-	it('should use the gulp version of the file', function(done) {
+	it('should pass a buffer through', function(done) {
 		gulp.src(testFile)
 			.pipe(es.map(function(file, cb) {
 				file.contents = new Buffer('var abc=123;');
@@ -54,9 +60,11 @@ describe('gulp-browserify', function() {
 			}))
 			.pipe(gulpB())
 			.pipe(es.map(function(file) {
-				expect(file.contents.toString()).to.not.equal(fileContents.toString());
-				expect(file.contents.toString()).to.match(/var abc=123;/);
+				String(file.contents.toString()).should.not.equal(fileContents.toString());
+				String(file.contents.toString()).should.match(/var abc=123;/);
 				done();
 			}));
 	});
+
+
 });
