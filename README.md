@@ -19,13 +19,13 @@ var concat = require('gulp-concat');
 
 gulp.task('scripts', function() {
 	//single entry point to browserify
-	gulp.src(['src/index.js'])
+	gulp.src(['src/js/*.js'])
 		.pipe(browserify({
 		  insertGlobals : true,
 		  debug : true
 		}))
 		.pipe(concat('dest.js'))
-		.pipe(gulp.dest('./build'))
+		.pipe(gulp.dest('./build/js'))
 });
 
 gulp.task('default', function() {
@@ -33,15 +33,7 @@ gulp.task('default', function() {
 });
 ```
 
-*Note* : Supports streams too, pass `{buffer : false}` as option to `gulp.src()`
-
 ### Options
-
-#### noParse
-
-Type : `[String]`
-
-Array of file paths that Browserify should not attempt to parse for require() statements, which should improve compilation time for large library files that do not need to be parsed.
 
 #### transform
 
