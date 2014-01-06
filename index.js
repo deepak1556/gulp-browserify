@@ -59,25 +59,20 @@ function gulpBrowserify(opts) {
               stream.emit('error', gutil.PluginError(PLUGIN_NAME, err));
             }).on('data', function(chunk) {
                 newFile.contents = Buffer.concat([newFile.contents, Buffer(chunk)]);
-            }).once('end', function() {
-                stream.emit('postbundle', newFile.contents.toString('utf-8'));
-                stream.push(newFile);
-                done();
+            }).on('end', function() {
+               stream.emit('postbundle', newFile.contents.toString('utf-8'));
+               stream.push(newFile);
+               done();
             });
         } else {
             newFile.contents = bundler.bundle(opts);
             newFile.contents.on('error', function() {
-              stream.emit('error', gutil.PluginError(PLUGIN_NAME, err));
+                stream.emit('error', gutil.PluginError(PLUGIN_NAME, err));
             });
             stream.push(newFile);
             done();
         }
 
-    };
-
-    stream._flush = function(done) {
-      stream.emit('end');
-      done();
     };
 
     return stream;
