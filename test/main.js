@@ -28,6 +28,12 @@ describe('gulp-browserify', function() {
 		expect(outputFile.contents).to.be.an.instanceof(Buffer);
 		done();
 	})
+
+  it('should be a valid vinyl file object', function() {
+    expect(outputFile.cwd).to.be.a('string', 'file.cwd is not a string');
+    expect(outputFile.base).to.be.a('string', 'file.base is not a string');
+    expect(outputFile.path).to.be.a('string', 'file.path is not a string');
+  })
 	
 	it('should bundle modules', function(done) {
 		var b = browserify();
