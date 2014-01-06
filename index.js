@@ -58,8 +58,7 @@ function gulpBrowserify(opts) {
             bundler.bundle(opts).on('error', function() {
               stream.emit('error', gutil.PluginError(PLUGIN_NAME, err));
             }).on('data', function(chunk) {
-                newFile.contents = Buffer.concat([newFile.contents, Buffer(chunk)],
-                    newFile.contents.length + chunk.length);
+                newFile.contents = Buffer.concat([newFile.contents, Buffer(chunk)]);
             }).once('end', function() {
                 stream.emit('postbundle', newFile.contents.toString('utf-8'));
                 stream.push(newFile);

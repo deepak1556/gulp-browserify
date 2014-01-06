@@ -38,8 +38,6 @@ describe('gulp-browserify', function() {
 		  b.bundle().on('data', function(data) {
 			  chunk += data;
 		  }).on('end', function() {
-		    expect(fileContents.toString().substr(0, 100))
-		       .to.equal(chunk.substr(0, 100));
 			  expect(fileContents.toString()).to.equal(chunk);
 			  done();
 		  })
@@ -47,8 +45,6 @@ describe('gulp-browserify', function() {
 
 
 	  it('should emit postbundle event', function(done) {
-		  expect(fileContents.toString().substr(0, 100))
-		      .to.equal(postdata.substr(0, 100));
 		  expect(fileContents.toString()).to.equal(postdata);
 		  done();
 	  })
@@ -100,7 +96,7 @@ describe('gulp-browserify', function() {
 		  b.bundle().on('data', function(data) {
 			  chunk += data;
 		  }).on('end', function() {
-			  expect(fileData.substr(0, 200)).to.equal(chunk.substr(0, 200));
+			  expect(fileData).to.equal(chunk);
 			  done();
 		  })
 	  })

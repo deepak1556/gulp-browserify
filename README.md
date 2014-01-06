@@ -18,18 +18,18 @@ var browserify = require('gulp-browserify');
 var concat = require('gulp-concat');
 
 gulp.task('scripts', function() {
-	//single entry point to browserify
-	gulp.src(['src/index.js'])
-		.pipe(browserify({
-		  insertGlobals : true,
-		  debug : true
-		}))
-		.pipe(concat('dest.js'))
-		.pipe(gulp.dest('./build'))
+  //single entry point to browserify
+  gulp.src(['src/index.js'])
+    .pipe(browserify({
+      insertGlobals : true,
+      debug : true
+    }))
+    .pipe(concat('dest.js'))
+    .pipe(gulp.dest('./build'))
 });
 
 gulp.task('default', function() {
-	gulp.run('scripts');
+  gulp.run('scripts');
 });
 ```
 
@@ -51,11 +51,11 @@ Specifies a pipeline of functions (or modules) through which the browserified bu
 
 ```javascript
 gulp.src(['src/**/*.coffee'])
-    .pipe(browserify({
-	transform : ['coffeeify'],
-	insertGlobals : true,
-	debug : true
-    }))
+  .pipe(browserify({
+    transform : ['coffeeify'],
+    insertGlobals : true,
+    debug : true
+  }))
 ```
 
 #### debug
