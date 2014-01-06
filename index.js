@@ -1,103 +1,81 @@
 'use strict'
-var es = require('event-stream');
+var Stream = require('stream');
 var gutil = require('gulp-util');
 var browserify = require('browserify');
 var path = require('path');
-var fs = require('fs');
-var isStream = gutil.isStream;
-var isBuffer = gutil.isBuffer;
 
-function error(str) {
-	gutil.log('gulp-browserify: ', gutil.colors.red(str));
-}
+var PLUGIN_NAME = 'gulp-browserify';
 
-module.exports = function(opts) {
+function gulpBrowserify(opts) {
     var opts = opts || {};
-    var ctrOpts = {};
-    var buffer = [];
-    var temp = [];
-    var bundler, chunk = '';
-    var itsABuffer = false;
-    var itsAStream = false;
+    var bufferMode = false;
 
-    function bufferContents(file) {
-    	buffer.push(file);
-    }
+    var stream = new Stream.Transform({objectMode: true});
 
-    function endStream() {
-    	if (buffer.length === 0) return this.emit('end');
+    stream._transform = function(file, unused, done) {
+        if(file.isNull()) return done(); // Do nothing
 
-    	var self = this;
+        // Convert buffer to stream
+        if(file.isBuffer()) {
+            file.contents = file.pipe(new Stream.PassThrough());
+            bufferMode = true;
+        }
 
-    	 buffer.map(function (file) {
-            if(isStream(file.contents)) {
-
-                itsAStream = true;
-               	ctrOpts.basedir = file.base;
-                ctrOpts.entries = file.contents;
-            }else if(isBuffer(file.contents)) {
-
-                itsABuffer = true;
-                ctrOpts.basedir = file.base;
-                temp.push(file.contents);
-                ctrOpts.entries = es.readArray(temp);
-            }else {
-
-                ctrOpts.entries = path.resolve(file.path);
-            }
-
-            if(opts.noParse) {
-                ctrOpts.noParse = opts.noParse.map(function(filepath) {
-                    return path.resolve(filepath);
-                })
-                delete opts.noParse;
-            }
-
-            bundler = browserify(ctrOpts);
-            bundler.on('error', function(err) {
-                error(err);
+        // Create the bundler
+        var bundler = new browserify([
+                file.isStream() ?
+                    file.contents :
+                    file.pipe(new Stream.PassThrough())
+            ], {
+            basedir: file.base,
+            noParse: (opts.noParse || []).map(function(filepath) {
+                return path.resolve(filepath);
             })
+        });
+        delete opts.noParse;
 
-            if(opts.transform) {
-                opts.transform.forEach(function(transform) {
-                    console.log(file.path);
-                    bundler.transform(transform);
-                })
-            }
+        bundler.on('error', function(err) {
+            stream.emit('error', gutil.PluginError(PLUGIN_NAME, err));
+        });
+        
+        (opts.transform || []).forEach(function(transform) {
+            bundler.transform(transform);
+        });
+        delete opts.transform;
 
-            self.emit('prebundle', bundler);
+        // Emit a prebundle event
+        stream.emit('prebundle', bundler);
 
-            var onBundleComplete = function(self, err, src) {
-                if(err) {
-                    error(err);
-                }
+        // Create the new file
+        var newFile = new gutil.File({
+            cwd: file.cwd,
+            base: file.base
+        });
 
-                var newFile = new gutil.File({
-                    cwd: file.cwd,
-                    base: file.base,
-                    contents: new Buffer(src)
-                });
+        // Setting file contents
+        if(bufferMode) {
+            newFile.contents = Buffer('');
+            bundler.bundle(opts).on('error', function() {
+              stream.emit('error', gutil.PluginError(PLUGIN_NAME, err));
+            }).on('data', function(chunk) {
+                newFile.contents = Buffer.concat([newFile.contents, Buffer(chunk)]);
+            }).on('end', function() {
+               stream.emit('postbundle', newFile.contents.toString('utf-8'));
+               stream.push(newFile);
+               done();
+            });
+        } else {
+            newFile.contents = bundler.bundle(opts);
+            newFile.contents.on('error', function() {
+                stream.emit('error', gutil.PluginError(PLUGIN_NAME, err));
+            });
+            stream.push(newFile);
+            done();
+        }
 
-                self.emit('postbundle', src);
+    };
 
-                self.emit('data', newFile);
-                self.emit('end');
-            }
-
-            if(itsAStream || itsABuffer ) {
-                var readable = bundler.bundle(opts);
-                readable.on('data', function(data) {
-                    chunk += data;
-                }).once('end', function(err) {
-                    onBundleComplete(self, err, chunk);
-                })
-            } else {
-                bundler.bundle(opts, function(err, src) {
-                    onBundleComplete(self, err, src);
-                })
-            }
-    	});
-	}
-
-	return es.through(bufferContents, endStream);
+    return stream;
 }
+
+module.exports = gulpBrowserify;
