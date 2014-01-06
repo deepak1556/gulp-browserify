@@ -106,7 +106,7 @@ describe('gulp-browserify', function() {
   })
 })
 
-describe.only('gulp-browserify in a destination file', function() {
+describe('gulp-browserify in a destination file', function() {
 
   var testFile = path.join(__dirname, './test.js');
 
