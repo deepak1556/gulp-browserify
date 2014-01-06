@@ -80,7 +80,7 @@ function gulpBrowserify(opts) {
       done();
     };
 
-	  return stream;
+    return stream;
 }
 
 module.exports = gulpBrowserify;
