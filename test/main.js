@@ -1,8 +1,10 @@
 var gulp = require('gulp');
+var gconcat = require('gulp-concat');
 var gulpB = require('../');
 var expect = require('chai').expect;
 var es = require('event-stream');
 var path = require('path');
+var fs = require('fs');
 var Stream = require('stream');
 var browserify = require('browserify');
 
@@ -57,7 +59,8 @@ describe('gulp-browserify', function() {
         }))
         .pipe(gulpB())
         .pipe(es.map(function(file) {
-          expect(file.contents.toString())
+          console.log(file.contents);
+          expect(file.contents.toString('utf-8'))
               .to.match(/var abc=123;/);
           done();
         }))
@@ -99,6 +102,61 @@ describe('gulp-browserify', function() {
         expect(fileData).to.equal(chunk);
         done();
       })
+    })
+  
+  })
+})
+
+describe('gulp-browserify in a destination file', function() {
+
+  var testFile = path.join(__dirname, './test.js');
+
+  describe('in buffer mode',function() {
+
+    it('should work', function(done) {
+      
+      gulp.src(testFile, {buffer: true})
+        .pipe(gulpB())
+        .pipe(es.map(function(file, cb) {
+          console.log('1',file); cb(); // Got a file with a buffer
+        }))
+        .pipe(gconcat('dest.js'))
+        .pipe(es.map(function(file, cb) {
+          console.log('2',file); cb(); // Never called
+        }))
+        .pipe(gulp.dest(__dirname + 'results/'))
+        .once('end', function() {
+          var b = browserify();
+          var chunk = '';
+          b.add(testFile)
+          b.bundle(null, function(err, data) {
+            expect(fs.readFileSync(__dirname + 'results/dest.js'))
+              .to.equal(data);
+          });
+        });
+
+    })
+  
+  })
+
+  describe('in stream mode',function() {
+
+    it('should work', function(done) {
+      
+      gulp.src(testFile, {buffer: false})
+        .pipe(gulpB())
+        .pipe(gconcat('dest.js'))
+        .pipe(gulp.dest(__dirname + 'results/'))
+        .once('end', function() {
+          var b = browserify();
+          var chunk = '';
+          b.add(testFile)
+          b.bundle(null, function(err, data) {
+            expect(fs.readFileSync(__dirname + 'results/dest.js'))
+              .to.equal(data);
+          });
+        });
+
     })
   
   })

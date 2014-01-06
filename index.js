@@ -68,7 +68,7 @@ function gulpBrowserify(opts) {
             newFile.contents = bundler.bundle(opts);
             newFile.contents.on('error', function() {
               stream.emit('error', gutil.PluginError(PLUGIN_NAME, err));
-            })
+            });
             stream.push(newFile);
             done();
         }

@@ -20,6 +20,7 @@
     "mocha": "~1.15.1",
     "chai": "~1.8.1",
     "gulp": "~3.2.4",
+    "gulp-concat": "latest",
     "event-stream": "*"
   },
   "keywords": [
