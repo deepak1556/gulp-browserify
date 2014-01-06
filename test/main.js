@@ -9,24 +9,31 @@ var postdata;
 
 describe('gulp-browserify', function() {
 	var testFile = path.join(__dirname, './test.js');
-	var fileContents;
+  var outputFile;
 
 	beforeEach(function(done) {
+    vfile = null;
 		gulp.src(testFile)
 			.pipe(gulpB())
 			.on('postbundle', function(data) {
 				postdata = data;
 			})
 			.pipe(es.map(function(file){
-				fileContents = file.contents;
+				outputFile = file;
 				done();
 			}))
 	})
 
 	it('should return a buffer', function(done) {
-		expect(fileContents).to.be.an.instanceof(Buffer);
+		expect(outputFile.contents).to.be.an.instanceof(Buffer);
 		done();
 	})
+
+  it('should be a valid vinyl file object', function() {
+    expect(outputFile.cwd).to.be.a('string', 'file.cwd is not a string');
+    expect(outputFile.base).to.be.a('string', 'file.base is not a string');
+    expect(outputFile.path).to.be.a('string', 'file.path is not a string');
+  })
 	
 	it('should bundle modules', function(done) {
 		var b = browserify();
@@ -35,14 +42,14 @@ describe('gulp-browserify', function() {
 		b.bundle().on('data', function(data) {
 			chunk += data;
 		}).on('end', function() {
-			expect(fileContents.toString()).to.equal(chunk);
+			expect(outputFile.contents.toString()).to.equal(chunk);
 			done();
 		})
 	})
 
 
 	it('should emit postbundle event', function(done) {
-		expect(fileContents.toString()).to.equal(postdata);
+		expect(outputFile.contents.toString()).to.equal(postdata);
 		done();
 	})
 
@@ -54,7 +61,7 @@ describe('gulp-browserify', function() {
 			}))
 			.pipe(gulpB())
 			.pipe(es.map(function(file) {
-				expect(file.contents.toString()).to.not.equal(fileContents.toString());
+				expect(file.contents.toString()).to.not.equal(outputFile.contents.toString());
 				expect(file.contents.toString()).to.match(/var abc=123;/);
 				done();
 			}))
