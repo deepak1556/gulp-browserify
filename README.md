@@ -47,16 +47,11 @@ Array of file paths that Browserify should not attempt to parse for require() st
 
 Type : `[String || function]`
 
-Specifies a pipeline of functions (or modules) through which the browserified bundle will be run. Below is an example of transform used with gulp-browserify to automatically compile coffeescript files for use in a bundle:
+Specifies a pipeline of functions (or modules) through which the browserified bundle will be run. 
 
-```javascript
-gulp.src(['src/**/*.coffee'])
-    .pipe(browserify({
-	transform : ['coffeeify'],
-	insertGlobals : true,
-	debug : true
-    }))
-```
+Transforms may not support input streams of browserify, since a temporary file is created to hold the contents of the input stream.
+
+For example, coffeeify expects the file input to end with `.coffee` or `.litcoffee` extension. However the temp file create by browserify has a `.js` extension. Instead, use [gulp-coffee](https://github.com/wearefractal/gulp-coffee) to transform the input file contents before piping into gulp-browserify.
 
 #### debug
 
@@ -69,6 +64,8 @@ Enable source map support
 Any other options you provide will be passed through to browserify. This is useful for setting things like `standalone` or `ignoreGlobals`.
 
 ### Events
+
+Other than standard Node.js stream events, gulp-browserify emit its own events.
 
 #### prebundle
 
