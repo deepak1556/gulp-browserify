@@ -9,7 +9,8 @@
     "browserify": "~3.14.0",
     "event-stream": "*",
     "gulp-util": "~2.2.0",
-    "gulp-concat": "~2.1.4"
+    "gulp-concat": "~2.1.4",
+    "browserify-shim": "~2.0.10"
   },
   "main": "index.js",
   "engines": {
