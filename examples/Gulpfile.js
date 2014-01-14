@@ -3,11 +3,15 @@ var browserify = require('../');
 var concat = require('gulp-concat');
 
 gulp.task('scripts', function(){
-  //single entry point to browserify
-  gulp.src('./src/index.js')
+  gulp.src('./src/normal.js')
   .pipe(browserify())
-  .pipe(concat('output.js'))
   .pipe(gulp.dest('./build'));
+});
+
+gulp.task('bundle', function(){
+  gulp.src('./src/*.js')
+  .pipe(browserify())
+  .pipe(gulp.dest('./bundle'));
 });
 
 gulp.task('default', function() {

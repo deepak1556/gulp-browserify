@@ -1,7 +1,8 @@
 var es = require('event-stream');
 var gutil = require('gulp-util');
 var browserify = require('browserify');
-
+var shim = require('browserify-shim');
+var path = require('path');
 
 module.exports = function(opts) {
   if(!opts) opts = {};
@@ -16,17 +17,29 @@ module.exports = function(opts) {
     var self = this;
 
     buffer.map(function (file) {
-      if (file.isNull) return cb(null, file); // pass along
-      if (file.isStream) return cb(new Error('Streams not supported'));
+      if (file.isNull()) return null, file; // pass along
+      if (file.isStream()) return new Error('Streams not supported');
 
       temp.push(file.contents);
       data.entries = es.readArray(temp);
       data.basedir = file.base;
 
-      bundler = browserify(data);
-      bundler.on('error', self.emit.bind(this, 'error'));
+      
 
-      if(opts.transform) opts.transform.forEach(bundler.transform);
+      if(opts.transform) opts.transform.forEach(function(transform){
+        bundler.transform(transform);
+      });
+      if(opts.shim) {
+        for(var lib in opts.shim) {
+            opts.shim[lib].path = path.resolve(opts.shim[lib].path);
+        }
+        bundler = shim(browserify(), opts.shim);
+        bundler.require(file.path, { entry: true });
+      }
+      else{
+        bundler = browserify(data);
+        bundler.on('error', self.emit.bind(this, 'error'));
+      }
 
       self.emit('prebundle', bundler);
       
@@ -35,6 +48,7 @@ module.exports = function(opts) {
         var newFile = new gutil.File({
           cwd: file.cwd,
           base: file.base,
+          path: file.path,
           contents: new Buffer(src)
         });
 
