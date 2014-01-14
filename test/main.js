@@ -1,14 +1,11 @@
 var fs = require('fs');
 var path = require('path');
 var gutil = require('gulp-util');
-var concat = require('gulp-concat');
 var should = require('should');
-//var es = require('event-stream');
-//var browserify = require('browserify');
 
-require('mocha');
 var gulpB = require('../');
 
+require('mocha');
 
 describe('gulp-browserify', function() {
 	

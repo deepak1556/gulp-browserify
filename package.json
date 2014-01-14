@@ -13,24 +13,20 @@
   ],
   "dependencies": {
     "browserify": "~3.14.1",
-    "event-stream": "*",
+    "event-stream": "~3.1.0",
     "gulp-util": "~2.2.5",
-    "gulp-concat": "~2.1.4",
-    "browserify-shim": "~2.0.10",
-    "should": "~2.1.1"
+    "browserify-shim": "~2.0.10"
   },
   "main": "index.js",
   "engines": {
     "node": ">= 0.8"
   },
   "scripts": {
-    "test": "mocha --timeout=4000"
+    "test": "mocha"
   },
   "devDependencies": {
     "mocha": "~1.15.1",
-    "chai": "~1.8.1",
-    "should": "*",
-    "gulp": "~3.1.4"
+    "should": "*"
   },
   "keywords": [
     "gulpplugin",
