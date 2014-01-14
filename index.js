@@ -2,6 +2,7 @@
 var es = require('event-stream');
 var gutil = require('gulp-util');
 var browserify = require('browserify');
+var shim = require('browserify-shim');
 var path = require('path');
 var fs = require('fs');
 var isStream = gutil.isStream;
@@ -19,6 +20,7 @@ module.exports = function(opts) {
     var bundler, chunk = '';
     var itsABuffer = false;
     var itsAStream = false;
+    var lib;
 
     function bufferContents(file) {
     	buffer.push(file);
@@ -53,7 +55,16 @@ module.exports = function(opts) {
                 delete opts.noParse;
             }
 
-            bundler = browserify(ctrOpts);
+            if(opts.shim) {
+                for(lib in opts.shim) {
+                    opts.shim[lib].path = path.resolve(opts.shim[lib].path);
+                }
+                bundler = shim(browserify(), opts.shim);
+                bundler.require(file.path, { entry: true });
+            } else {
+                bundler = browserify(ctrOpts);
+            }
+
             bundler.on('error', function(err) {
                 error(err);
             })
