@@ -55,6 +55,11 @@ module.exports = function(opts) {
                 delete opts.noParse;
             }
 
+            if(opts.extensions) {
+                ctrOpts.extensions = opts.extensions;
+                delete opts.extensions;
+            }
+
             if(opts.shim) {
                 for(lib in opts.shim) {
                     opts.shim[lib].path = path.resolve(opts.shim[lib].path);
