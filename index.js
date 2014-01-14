@@ -81,6 +81,8 @@ module.exports = function(opts) {
             var onBundleComplete = function(self, err, src) {
                 if(err) {
                     error(err);
+                    self.emit('error', err);
+                    return;
                 }
 
                 var newFile = new gutil.File({
