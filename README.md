@@ -59,6 +59,12 @@ Type : `Boolean`
 
 Enable source map support
 
+#### extensions
+
+Type: `[String]`
+
+Array of extensions that you want to skip in `require()` calls in addition to `.js` and `.json`. Don't forget `.`.
+
 #### Other Options
 
 Any other options you provide will be passed through to browserify. This is useful for setting things like `standalone` or `ignoreGlobals`.
