@@ -38,6 +38,15 @@ var gulp = require('gulp');
 var browserify = require('gulp-browserify');
 var concat = require('gulp-concat');
 
+// Basic usage
+gulp.task('basic', function(){
+	gulp.src('./src/*.js')
+	.pipe(browserify())
+	.pipe(gulp.dest('./build/js'));
+});
+
+
+
 gulp.task('scripts', function() {
 	//single entry point to browserify
 	gulp.src(['src/js/*.js'])
