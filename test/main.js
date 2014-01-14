@@ -29,11 +29,11 @@ describe('gulp-browserify', function() {
 		done();
 	})
 
-  it('should be a valid vinyl file object', function() {
-    expect(outputFile.cwd).to.be.a('string', 'file.cwd is not a string');
-    expect(outputFile.base).to.be.a('string', 'file.base is not a string');
-    expect(outputFile.path).to.be.a('string', 'file.path is not a string');
-  })
+  	it('should be a valid vinyl file object', function() {
+    	expect(outputFile.cwd).to.be.a('string', 'file.cwd is not a string');
+    	expect(outputFile.base).to.be.a('string', 'file.base is not a string');
+    	expect(outputFile.path).to.be.a('string', 'file.path is not a string');
+  	})
 
 	it('should bundle modules', function(done) {
 		var b = browserify();
@@ -74,7 +74,7 @@ describe('gulp-browserify shim', function() {
   	var outputFile;
 
 	beforeEach(function(done) {
-    vfile = null;
+    	vfile = null;
 		gulp.src(testFile)
 			.pipe(gulpB({
 				shim: {
@@ -92,6 +92,7 @@ describe('gulp-browserify shim', function() {
 				done();
 			}))
 	});
+
 	it('should be able to bundle all defined modules in to one bundle', function(done) {
 		expect(outputFile.contents.toString()).to.contain('window.bar = \'foobar\'');
 		expect(outputFile.contents.toString()).to.contain('console.log(\'foo\');');
@@ -107,6 +108,8 @@ describe('gulp-browserify non stream error', function () {
 			.pipe(gulpB())
 			.on('error', function () { done(); })
 			.on('postbundle', function () { throw new Error('No error was emitted.') });
+	});
+});			
 
 describe('gulp-browserify extensions', function () {
 	var testFile = path.join(__dirname, './extensions/index.js');
@@ -122,6 +125,7 @@ describe('gulp-browserify extensions', function () {
 				done();
 			}));
 	});
+	
 	it('should find dependencies with given extension', function () {
 		expect(outputFile.contents.toString()).to.contain("foo: 'Foo!'");
 		expect(outputFile.contents.toString()).to.contain("bar: 'Bar!'");
