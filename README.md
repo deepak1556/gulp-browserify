@@ -63,6 +63,26 @@ Enable source map support
 
 Any other options you provide will be passed through to browserify. This is useful for setting things like `standalone` or `ignoreGlobals`.
 
+### Browserify-Shim
+
+```javascript
+gulp.task('scripts', function() {
+	//single entry point to browserify
+	gulp.src(['src/index.js'])
+		.pipe(browserify({
+		  shim : {
+		    lib : {
+		  		path : `/path/to/shimfile`
+		  		exports : 
+		    }
+		  }
+		}))
+		.pipe(concat('dest.js'))
+		.pipe(gulp.dest('./build'))
+});
+
+```
+
 ### Events
 
 Other than standard Node.js stream events, gulp-browserify emit its own events.
