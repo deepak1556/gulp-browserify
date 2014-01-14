@@ -12,9 +12,9 @@ function error(str) {
 	gutil.log('gulp-browserify: ', gutil.colors.red(str));
 }
 
-module.exports = function(opts) {
+module.exports = function(opts, ctrOpts) {
     var opts = opts || {};
-    var ctrOpts = {};
+    var ctrOpts = ctrOpts || {};
     var buffer = [];
     var temp = [];
     var bundler, chunk = '';
