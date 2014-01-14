@@ -9,7 +9,7 @@ var postdata;
 
 describe('gulp-browserify', function() {
 	var testFile = path.join(__dirname, './test.js');
-  var outputFile;
+  	var outputFile;
 
 	beforeEach(function(done) {
     vfile = null;
@@ -71,7 +71,7 @@ describe('gulp-browserify', function() {
 describe('gulp-browserify shim', function() {
 	var testFile = path.join(__dirname, './shim/shim.js');
 	var shimFile = path.join(__dirname, './shim/bar.js');
-  var outputFile;
+  	var outputFile;
 
 	beforeEach(function(done) {
     vfile = null;
@@ -107,5 +107,23 @@ describe('gulp-browserify non stream error', function () {
 			.pipe(gulpB())
 			.on('error', function () { done(); })
 			.on('postbundle', function () { throw new Error('No error was emitted.') });
+
+describe('gulp-browserify extensions', function () {
+	var testFile = path.join(__dirname, './extensions/index.js');
+	var postData, outputFile;
+	beforeEach(function (done) {
+		gulp.src(testFile)
+			.pipe(gulpB({ extensions: ['.foo', '.bar'] }))
+			.on('postbundle', function(data) {
+				postdata = data;
+			})
+			.pipe(es.map(function(file){
+				outputFile = file;
+				done();
+			}));
+	});
+	it('should find dependencies with given extension', function () {
+		expect(outputFile.contents.toString()).to.contain("foo: 'Foo!'");
+		expect(outputFile.contents.toString()).to.contain("bar: 'Bar!'");
 	});
 });
