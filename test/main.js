@@ -99,3 +99,23 @@ describe('gulp-browserify shim', function() {
 	});
 });
 
+
+describe('gulp-browserify extensions', function () {
+	var testFile = path.join(__dirname, './extensions/index.js');
+	var postData, outputFile;
+	beforeEach(function (done) {
+		gulp.src(testFile)
+			.pipe(gulpB({ extensions: ['.foo', '.bar'] }))
+			.on('postbundle', function(data) {
+				postdata = data;
+			})
+			.pipe(es.map(function(file){
+				outputFile = file;
+				done();
+			}));
+	});
+	it('should find dependencies with given extension', function () {
+		expect(outputFile.contents.toString()).to.contain("foo: 'Foo!'");
+		expect(outputFile.contents.toString()).to.contain("bar: 'Bar!'");
+	});
+});

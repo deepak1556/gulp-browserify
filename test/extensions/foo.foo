@@ -1,0 +1,6 @@
+var bar = require('./bar');
+
+module.exports = {
+  foo: 'Foo!',
+  bar: bar
+};
