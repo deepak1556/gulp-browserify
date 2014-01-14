@@ -51,7 +51,7 @@ Specifies a pipeline of functions (or modules) through which the browserified bu
 
 Transforms may not support input streams of browserify, since a temporary file is created to hold the contents of the input stream.
 
-For example, coffeeify expects the file input to end with `.coffee` or `.litcoffee` extension. However the temp file create by browserify has a `.js` extension. Instead, use [gulp-coffee](https://github.com/wearefractal/gulp-coffee) to transform the input file contents before piping into gulp-browserify.
+For example, coffeeify expects the file input to end with `.coffee` or `.litcoffee` extension. However the temp file create by browserify has a `.js` extension. Instead, use [gulp-coffee](https://github.com/wearefractal/gulp-coffee) to transform the input file contents before piping into gulp-browserify. Or you can stick with coffeeify using `gulp.src('./index.js', { read: false })` to preserve extension and giving `['.coffee', '.litcoffee']` to `extensions` option.
 
 #### debug
 
