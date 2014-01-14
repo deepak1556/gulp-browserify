@@ -99,3 +99,13 @@ describe('gulp-browserify shim', function() {
 	});
 });
 
+describe('gulp-browserify non stream error', function () {
+	var testFile = path.join(__dirname, './error/index.js');
+
+	it('emits error if browserify calls callback with error', function (done) {
+		gulp.src(testFile, { read: false })
+			.pipe(gulpB())
+			.on('error', function () { done(); })
+			.on('postbundle', function () { throw new Error('No error was emitted.') });
+	});
+});
