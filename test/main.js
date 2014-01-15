@@ -60,7 +60,7 @@ describe('gulp-browserify', function() {
     B.write(fakeFile);
     B.end(fakeFile);
   });
-/*
+
   it('should return a browserify require file', function(done) {
     var fakeFile = new gutil.File({
       base: 'test/fixtures',
@@ -78,7 +78,7 @@ describe('gulp-browserify', function() {
     B.write(fakeFile);
     B.end(fakeFile);
 	});
-*/
+
 	it('should use the file modified through gulp', function(done) {
     var fakeFile = new gutil.File({
       cwd: "test/",
@@ -114,7 +114,7 @@ describe('gulp-browserify', function() {
     B.write(fakeFile);
     B.end(fakeFile);
   });
-/*
+
   it('should emit postbundle event', function(done) {
     var fakeFile = new gutil.File({
       base: 'test/fixtures',
@@ -133,7 +133,7 @@ describe('gulp-browserify', function() {
     B.write(fakeFile);
     B.end(fakeFile);
   });  
-*/
+
   it('should use extensions', function(done) {
     var fakeFile = new gutil.File({
       cwd: "test/fixtures/",
@@ -169,7 +169,7 @@ describe('gulp-browserify', function() {
       should.exist(fakeFile.contents);
     B.once('end', function(){
       files.length.should.equal(1);
-      files[0].contents.length.should.equal(568);
+      files[0].contents.length.should.equal(537);
     });
       done();
     });
