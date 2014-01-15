@@ -131,3 +131,23 @@ describe('gulp-browserify extensions', function () {
 		expect(outputFile.contents.toString()).to.contain("bar: 'Bar!'");
 	});
 });
+
+describe('gulp-browserify external with buffer', function () {
+	it('should not bundle external module', function (done) {
+		var testFile = path.join(__dirname, './test.js');
+		var files = [];
+		gulp.src(testFile) // `gulp.src` defaults to buffer contents.
+				.pipe(gulpB())
+				.on('prebundle', function (bundler) {
+					bundler.external('gulp');
+				})
+				.on('data', function (file) {
+					files.push(file);
+				})
+				.on('end', function () {
+					expect(files.length).to.eq(1);
+					expect(files[0].contents.length).to.be.lessThan(1000);
+					done();
+				});
+	});
+});

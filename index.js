@@ -5,6 +5,8 @@ var browserify = require('browserify');
 var shim = require('browserify-shim');
 var path = require('path');
 var fs = require('fs');
+var util = require('util');
+var stream = require('stream');
 var isStream = gutil.isStream;
 var isBuffer = gutil.isBuffer;
 
@@ -12,11 +14,24 @@ function error(str) {
 	gutil.log('gulp-browserify: ', gutil.colors.red(str));
 }
 
+
+// A readable stream that emits a single buffer.
+util.inherits(BufferStream, stream.Readable);
+
+function BufferStream(buffer) {
+    stream.Readable.call(this, { objectMode: true });
+    this._buffer = buffer;
+}
+
+BufferStream.prototype._read = function (size) {
+    this.push(this._buffer);
+    this.push(null);
+};
+
 module.exports = function(opts) {
     var opts = opts || {};
     var ctrOpts = {};
     var buffer = [];
-    var temp = [];
     var bundler, chunk = '';
     var itsABuffer = false;
     var itsAStream = false;
@@ -41,8 +56,7 @@ module.exports = function(opts) {
 
                 itsABuffer = true;
                 ctrOpts.basedir = file.base;
-                temp.push(file.contents);
-                ctrOpts.entries = es.readArray(temp);
+                ctrOpts.entries = new BufferStream(file.contents);
             }else {
 
                 ctrOpts.entries = path.resolve(file.path);
