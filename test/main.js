@@ -172,7 +172,7 @@ describe('gulp-browserify multiple entry points', function () {
 });
 
 describe('gulp-browserify noParse', function () {
-	it('should not parse and browserify noParse module', function (done) {
+	it('should not parse or browserify noParse module', function (done) {
 		var testFile = path.join(__dirname, './test.js');
 		var files = [];
 		gulp.src(testFile)
