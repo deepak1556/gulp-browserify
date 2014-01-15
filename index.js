@@ -5,6 +5,8 @@ var browserify = require('browserify');
 var shim = require('browserify-shim');
 var path = require('path');
 var fs = require('fs');
+var util = require('util');
+var Readable = require('stream').Readable || require('readable-stream');
 var isStream = gutil.isStream;
 var isBuffer = gutil.isBuffer;
 
@@ -12,12 +14,30 @@ function error(str) {
 	gutil.log('gulp-browserify: ', gutil.colors.red(str));
 }
 
+// A readable stream that emits items in a given array.
+function ArrayStream(items) {
+    Readable.call(this, { objectMode: true });
+    this._items = items;
+    this._index = 0;
+}
+
+util.inherits(ArrayStream, Readable);
+
+ArrayStream.prototype._read = function (size) {
+    if (this._index < this._items.length) {
+        this.push(this._items[this._index]);
+        this._index ++;
+    } else {
+        this.push(null);
+    }
+};
+
 module.exports = function(opts) {
     var opts = opts || {};
     var ctrOpts = {};
     var buffer = [];
-    var temp = [];
     var bundler, chunk = '';
+    var doneCount = 0;
     var itsABuffer = false;
     var itsAStream = false;
     var lib;
@@ -31,7 +51,7 @@ module.exports = function(opts) {
 
     	var self = this;
 
-    	 buffer.map(function (file) {
+    	 buffer.forEach(function (file) {
             if(isStream(file.contents)) {
 
                 itsAStream = true;
@@ -41,17 +61,14 @@ module.exports = function(opts) {
 
                 itsABuffer = true;
                 ctrOpts.basedir = file.base;
-                temp.push(file.contents);
-                ctrOpts.entries = es.readArray(temp);
+                ctrOpts.entries = new ArrayStream([file.contents]);
             }else {
 
                 ctrOpts.entries = path.resolve(file.path);
             }
 
             if(opts.noParse) {
-                ctrOpts.noParse = opts.noParse.map(function(filepath) {
-                    return path.resolve(filepath);
-                })
+                ctrOpts.noParse = opts.noParse;
                 delete opts.noParse;
             }
 
@@ -100,7 +117,10 @@ module.exports = function(opts) {
                 self.emit('postbundle', src);
 
                 self.emit('data', newFile);
-                self.emit('end');
+
+                if (++doneCount === buffer.length) {
+                    self.emit('end');
+                }
             }
 
             if(itsAStream || itsABuffer ) {
