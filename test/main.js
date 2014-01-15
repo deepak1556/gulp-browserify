@@ -120,13 +120,12 @@ describe('gulp-browserify', function() {
       base: 'test/fixtures',
       cwd: 'test/',
       path: 'test/fixtures/normal.js',
-      contents: new Buffer("var test = 'test';")
+      contents: new Buffer(fs.readFileSync('test/fixtures/normal.js', 'utf8'))
     });
     var B = gulpB();
     B.once('data', function(fakeFile) {
       should.exist(fakeFile);
       should.exist(fakeFile.contents);
-      String(fakeFile.contents).should.not.equal("var test = 'test';");
     }).on('postbundle', function(data) {
       String(data).should.equal(fs.readFileSync('test/expected/normal.js', 'utf8'));
       done();      
