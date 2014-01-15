@@ -115,4 +115,24 @@ describe('gulp-browserify', function() {
     B.end(fakeFile);
 	});
 
+  it('should emit postbundle event', function(done) {
+    var fakeFile = new gutil.File({
+      base: 'test/fixtures',
+      cwd: 'test/',
+      path: 'test/fixtures/normal.js',
+      contents: new Buffer("var test = 'test';")
+    });
+    var B = gulpB();
+    B.once('data', function(fakeFile) {
+      should.exist(fakeFile);
+      should.exist(fakeFile.contents);
+      String(fakeFile.contents).should.not.equal("var test = 'test';");
+    }).on('postbundle', function(data) {
+      String(data).should.equal(fs.readFileSync('test/expected/normal.js', 'utf8'));
+      done();      
+    });
+    B.write(fakeFile);
+    B.end(fakeFile);
+  });  
+
 });
