@@ -6,7 +6,7 @@ var shim = require('browserify-shim');
 var path = require('path');
 var fs = require('fs');
 var util = require('util');
-var stream = require('stream');
+var Readable = require('stream').Readable || require('readable-stream');
 var isStream = gutil.isStream;
 var isBuffer = gutil.isBuffer;
 
@@ -16,12 +16,12 @@ function error(str) {
 
 // A readable stream that emits items in a given array.
 function ArrayStream(items) {
-    stream.Readable.call(this, { objectMode: true });
+    Readable.call(this, { objectMode: true });
     this._items = items;
     this._index = 0;
 }
 
-util.inherits(ArrayStream, stream.Readable);
+util.inherits(ArrayStream, Readable);
 
 ArrayStream.prototype._read = function (size) {
     if (this._index < this._items.length) {
