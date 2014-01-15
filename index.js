@@ -15,13 +15,13 @@ function error(str) {
 }
 
 // A readable stream that emits items in a given array.
-util.inherits(ArrayStream, stream.Readable);
-
 function ArrayStream(items) {
     stream.Readable.call(this, { objectMode: true });
     this._items = items;
     this._index = 0;
 }
+
+util.inherits(ArrayStream, stream.Readable);
 
 ArrayStream.prototype._read = function (size) {
     if (this._index < this._items.length) {
