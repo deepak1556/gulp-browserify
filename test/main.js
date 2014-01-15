@@ -101,10 +101,10 @@ describe('gulp-browserify', function() {
     var fakeFile = new gutil.File({
       cwd: "test/",
       base: "test/",
-      path: path.join(__dirname, './shim/shim.js'),
-      contents: new Buffer(fs.readFileSync('test/shim/shim.js'))
+      path: path.join(__dirname, './fixtures/shim.js'),
+      contents: new Buffer(fs.readFileSync('test/fixtures/shim.js'))
     });
-    var B = gulpB({shim: {bar: {path: 'test/shim/bar.js', exports: 'bar'}}});
+    var B = gulpB({shim: {bar: {path: 'test/fixtures/bar.js', exports: 'bar'}}});
     B.once('data', function(fakeFile){
       should.exist(fakeFile);
       should.exist(fakeFile.contents);
@@ -113,7 +113,50 @@ describe('gulp-browserify', function() {
     });
     B.write(fakeFile);
     B.end(fakeFile);
-	});
+  });
 
+
+  it('should use extensions', function(done) {
+    var fakeFile = new gutil.File({
+      cwd: "test/fixtures/",
+      base: "test/fixtures/",
+      path: path.join(__dirname, './fixtures/extension.js'),
+      contents: new Buffer(fs.readFileSync('test/fixtures/extension.js'))
+    });
+    var B = gulpB({ extensions: ['.foo', '.bar'] });
+    B.once('data', function(fakeFile){
+      should.exist(fakeFile);
+      should.exist(fakeFile.contents);
+      String(fakeFile.contents).should.match(/foo: 'Foo!'/);
+      String(fakeFile.contents).should.match(/bar: 'Bar!'/);
+      
+      done();
+    });
+    B.write(fakeFile);
+    B.end(fakeFile);
+  });
+
+  it('should not parse with noParse', function(done) {
+    var fakeFile = new gutil.File({
+      cwd: "test/fixtures/",
+      base: "test/fixtures/",
+      path: path.join(__dirname, './fixtures/normal.js'),
+      contents: new Buffer(fs.readFileSync('test/fixtures/normal.js'))
+    });
+    var B = gulpB({noParse: 'should'});
+    var files = [];
+    B.once('data', function(fakeFile){
+      files.push(fakeFile);
+      should.exist(fakeFile);
+      should.exist(fakeFile.contents);
+    B.once('end', function(){
+      files.length.should.equal(1);
+      files[0].contents.length.should.equal(568);
+    });
+      done();
+    });
+    B.write(fakeFile);
+    B.end(fakeFile);
+  });
 
 });
