@@ -1,3 +1,3 @@
-(function(window) {
+(function(window){
   window.bar = 'foobar';
 })(window);
