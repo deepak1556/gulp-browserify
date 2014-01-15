@@ -126,6 +126,7 @@ describe('gulp-browserify', function() {
     B.once('data', function(fakeFile) {
       should.exist(fakeFile);
       should.exist(fakeFile.contents);
+      done();
     }).on('postbundle', function(data) {
       String(data).should.equal(fs.readFileSync('test/expected/normal.js', 'utf8'));    
     });
