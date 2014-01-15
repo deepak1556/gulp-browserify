@@ -1,135 +1,182 @@
-var gulp = require('gulp');
-var gulpB = require('../');
-var expect = require('chai').expect;
-var es = require('event-stream');
+var fs = require('fs');
 var path = require('path');
-var browserify = require('browserify');
+var gutil = require('gulp-util');
+var should = require('should');
 
-var postdata;
+var gulpB = require('../');
+
+require('mocha');
 
 describe('gulp-browserify', function() {
-	var testFile = path.join(__dirname, './test.js');
-  	var outputFile;
-
-	beforeEach(function(done) {
-    vfile = null;
-		gulp.src(testFile)
-			.pipe(gulpB())
-			.on('postbundle', function(data) {
-				postdata = data;
-			})
-			.pipe(es.map(function(file){
-				outputFile = file;
-				done();
-			}))
-	})
-
-	it('should return a buffer', function(done) {
-		expect(outputFile.contents).to.be.an.instanceof(Buffer);
-		done();
-	})
-
-  	it('should be a valid vinyl file object', function() {
-    	expect(outputFile.cwd).to.be.a('string', 'file.cwd is not a string');
-    	expect(outputFile.base).to.be.a('string', 'file.base is not a string');
-    	expect(outputFile.path).to.be.a('string', 'file.path is not a string');
-  	})
-
-	it('should bundle modules', function(done) {
-		var b = browserify();
-		var chunk = '';
-		b.add(testFile)
-		b.bundle().on('data', function(data) {
-			chunk += data;
-		}).on('end', function() {
-			expect(outputFile.contents.toString()).to.equal(chunk);
-			done();
-		})
-	})
-
-
-	it('should emit postbundle event', function(done) {
-		expect(outputFile.contents.toString()).to.equal(postdata);
-		done();
-	})
-
-	it('should use the gulp version of the file', function(done) {
-		gulp.src(testFile)
-			.pipe(es.map(function(file, cb) {
-				file.contents = new Buffer('var abc=123;');
-				cb(null, file);
-			}))
-			.pipe(gulpB())
-			.pipe(es.map(function(file) {
-				expect(file.contents.toString()).to.not.equal(outputFile.contents.toString());
-				expect(file.contents.toString()).to.match(/var abc=123;/);
-				done();
-			}))
-	})
-})
-
-describe('gulp-browserify shim', function() {
-	var testFile = path.join(__dirname, './shim/shim.js');
-	var shimFile = path.join(__dirname, './shim/bar.js');
-  	var outputFile;
-
-	beforeEach(function(done) {
-    	vfile = null;
-		gulp.src(testFile)
-			.pipe(gulpB({
-				shim: {
-					bar: {
-						path: shimFile,
-						exports: 'bar'
-					}
-				}
-			}))
-			.on('postbundle', function(data) {
-				postdata = data;
-			})
-			.pipe(es.map(function(file){
-				outputFile = file;
-				done();
-			}))
-	});
-
-	it('should be able to bundle all defined modules in to one bundle', function(done) {
-		expect(outputFile.contents.toString()).to.contain('window.bar = \'foobar\'');
-		expect(outputFile.contents.toString()).to.contain('console.log(\'foo\');');
-		done();
-	});
-});
-
-describe('gulp-browserify non stream error', function () {
-	var testFile = path.join(__dirname, './error/index.js');
-
-	it('emits error if browserify calls callback with error', function (done) {
-		gulp.src(testFile, { read: false })
-			.pipe(gulpB())
-			.on('error', function () { done(); })
-			.on('postbundle', function () { throw new Error('No error was emitted.') });
-	});
-});			
-
-describe('gulp-browserify extensions', function () {
-	var testFile = path.join(__dirname, './extensions/index.js');
-	var postData, outputFile;
-	beforeEach(function (done) {
-		gulp.src(testFile)
-			.pipe(gulpB({ extensions: ['.foo', '.bar'] }))
-			.on('postbundle', function(data) {
-				postdata = data;
-			})
-			.pipe(es.map(function(file){
-				outputFile = file;
-				done();
-			}));
-	});
 	
-	it('should find dependencies with given extension', function () {
-		expect(outputFile.contents.toString()).to.contain("foo: 'Foo!'");
-		expect(outputFile.contents.toString()).to.contain("bar: 'Bar!'");
+  it('should return files', function(done) {
+    var fakeFile = new gutil.File({
+      cwd: "test/",
+      base: "test/",
+      path: "test/fixtures/normal.js",
+      contents: new Buffer("var test = 'test';")
+    });
+    var B = gulpB();
+    B.once('data', function(fakeFile){
+      should.exist(fakeFile);
+      should.exist(fakeFile.contents);
+      done();
+    });
+    B.write(fakeFile);
+    B.end(fakeFile);
+  });
+
+  it('should return a buffer', function(done) {
+    var fakeFile = new gutil.File({
+      cwd: "test/",
+      base: "test/",
+      path: "test/fixtures/normal.js",
+      contents: new Buffer("var test = 'test';")
+    });
+    var B = gulpB();
+    B.once('data', function(fakeFile){
+      should.exist(fakeFile);
+      fakeFile.contents.should.be.an.instanceof(Buffer);
+      done();
+    });
+    B.write(fakeFile);
+    B.end(fakeFile);
+  });
+  
+  it('should return a vinyl file object', function(done) {
+    var fakeFile = new gutil.File({
+      cwd: "test/",
+      base: "test/",
+      path: "test/fixtures/normal.js",
+      contents: new Buffer("var test = 'test';")
+    });
+    var B = gulpB();
+    B.once('data', function(fakeFile){
+      fakeFile.cwd.should.be.type('string');
+      fakeFile.base.should.be.type('string');
+      fakeFile.path.should.be.type('string');
+      done();
+    });
+    B.write(fakeFile);
+    B.end(fakeFile);
+  });
+
+  it('should return a browserify require file', function(done) {
+    var fakeFile = new gutil.File({
+      base: 'test/fixtures',
+      cwd: 'test/',
+      path: 'test/fixtures/normal.js',
+      contents: new Buffer(fs.readFileSync('test/fixtures/normal.js', 'utf8'))
+    });
+    var B = gulpB();
+    B.once('data', function(fakeFile) {
+      should.exist(fakeFile);
+      should.exist(fakeFile.contents);
+      String(fakeFile.contents).should.equal(fs.readFileSync('test/expected/normal.js', 'utf8'));
+      done();
+    });
+    B.write(fakeFile);
+    B.end(fakeFile);
 	});
+
+	it('should use the file modified through gulp', function(done) {
+    var fakeFile = new gutil.File({
+      cwd: "test/",
+      base: "test/",
+      path: "test/fixtures/normal.js",
+      contents: new Buffer("var test = 'test';")
+    });
+    var B = gulpB();
+    B.once('data', function(fakeFile){
+      should.exist(fakeFile);
+      should.exist(fakeFile.contents);
+      String(fakeFile.contents).should.not.equal("var test = 'test';");
+      done();
+    });
+    B.write(fakeFile);
+    B.end(fakeFile);
+  });
+
+  it('should shim files', function(done) {
+    var fakeFile = new gutil.File({
+      cwd: "test/",
+      base: "test/",
+      path: path.join(__dirname, './fixtures/shim.js'),
+      contents: new Buffer(fs.readFileSync('test/fixtures/shim.js'))
+    });
+    var B = gulpB({shim: {bar: {path: 'test/fixtures/bar.js', exports: 'bar'}}});
+    B.once('data', function(fakeFile){
+      should.exist(fakeFile);
+      should.exist(fakeFile.contents);
+      String(fakeFile.contents).should.match(/window.bar = \'foobar\'/);
+      done();
+    });
+    B.write(fakeFile);
+    B.end(fakeFile);
+  });
+
+  it('should emit postbundle event', function(done) {
+    var fakeFile = new gutil.File({
+      base: 'test/fixtures',
+      cwd: 'test/',
+      path: 'test/fixtures/normal.js',
+      contents: new Buffer(fs.readFileSync('test/fixtures/normal.js', 'utf8'))
+    });
+    var B = gulpB();
+    B.once('data', function(fakeFile) {
+      should.exist(fakeFile);
+      should.exist(fakeFile.contents);
+      done();
+    }).on('postbundle', function(data) {
+      String(data).should.equal(fs.readFileSync('test/expected/normal.js', 'utf8'));    
+    });
+    B.write(fakeFile);
+    B.end(fakeFile);
+  });  
+
+  it('should use extensions', function(done) {
+    var fakeFile = new gutil.File({
+      cwd: "test/fixtures/",
+      base: "test/fixtures/",
+      path: path.join(__dirname, './fixtures/extension.js'),
+      contents: new Buffer(fs.readFileSync('test/fixtures/extension.js'))
+    });
+    var B = gulpB({ extensions: ['.foo', '.bar'] });
+    B.once('data', function(fakeFile){
+      should.exist(fakeFile);
+      should.exist(fakeFile.contents);
+      String(fakeFile.contents).should.match(/foo: 'Foo!'/);
+      String(fakeFile.contents).should.match(/bar: 'Bar!'/);
+      
+      done();
+    });
+    B.write(fakeFile);
+    B.end(fakeFile);
+  });
+
+  it('should not parse with noParse', function(done) {
+    var fakeFile = new gutil.File({
+      cwd: "test/fixtures/",
+      base: "test/fixtures/",
+      path: path.join(__dirname, './fixtures/normal.js'),
+      contents: new Buffer(fs.readFileSync('test/fixtures/normal.js'))
+    });
+    var B = gulpB({noParse: 'should'});
+    var files = [];
+    B.once('data', function(fakeFile){
+      files.push(fakeFile);
+      should.exist(fakeFile);
+      should.exist(fakeFile.contents);
+    B.once('end', function(){
+      files.length.should.equal(1);
+      files[0].contents.length.should.equal(568);
+    });
+      done();
+    });
+    B.write(fakeFile);
+    B.end(fakeFile);
+  });
+
 });
 
 describe('gulp-browserify external with buffer', function () {

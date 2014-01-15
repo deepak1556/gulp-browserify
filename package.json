@@ -5,25 +5,32 @@
   "license": "MIT",
   "repository": "https://github.com/deepak1556/gulp-browserify",
   "author": "Robo <hop2deep@gmail.com>",
+  "contributors": [
+    {
+      "name": "Steve Lacy",
+      "email": "me@slacy.me"
+    },
+    {
+      "name": "Shuhei Kagawa",
+      "email": "shuhei.kagawa@gmail.com"
+    }
+  ],
   "dependencies": {
-    "browserify": "~3.14.0",
-    "event-stream": "*",
-    "gulp-util": "~2.2.0",
-    "gulp-concat": "~2.1.4",
-    "browserify-shim": "~2.0.10",
-    "readable-stream": "~1.1.10"
+    "browserify": "~3.14.1",
+    "event-stream": "~3.1.0",
+    "gulp-util": "~2.2.5",
+    "browserify-shim": "~2.0.10"
   },
   "main": "index.js",
   "engines": {
-    "node": ">= 0.6"
+    "node": ">= 0.8"
   },
   "scripts": {
-    "test": "mocha --timeout=6000"
+    "test": "mocha"
   },
   "devDependencies": {
     "mocha": "~1.15.1",
-    "chai": "~1.8.1",
-    "gulp": "~3.1.4"
+    "should": "*"
   },
   "keywords": [
     "gulpplugin",

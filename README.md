@@ -1,13 +1,34 @@
-[gulp](https://github.com/wearefractal/gulp)-browserify
-===============
-
-Bundle modules with BrowserifyJS
 [![Build Status](https://travis-ci.org/deepak1556/gulp-browserify.png)](https://travis-ci.org/deepak1556/gulp-browserify)
+[![NPM version](https://badge.fury.io/js/gulp-browserify.png)](http://badge.fury.io/js/gulp-browserify)
+
+#[gulp](https://github.com/gulpjs/gulp)-browserify
+
+<table>
+<tr> 
+<td>Package</td><td>gulp-browserify</td>
+</tr>
+<tr>
+<td>Description</td>
+<td>Bundle modules with BrowserifyJS</td>
+</tr>
+<tr>
+<td>Node Version</td>
+<td>>= 0.8</td>
+</tr>
+<tr>
+<td>Gulp Version</td>
+<td>3.x</td>
+
+</tr>
+</table>
+
+# Usage
+
 
 ## Install
 
 ```
-npm install --save gulp-browserify
+npm install gulp-browserify --save
 ```
 
 ## Example
@@ -17,15 +38,24 @@ var gulp = require('gulp');
 var browserify = require('gulp-browserify');
 var concat = require('gulp-concat');
 
+// Basic usage
+gulp.task('basic', function(){
+	gulp.src('./src/*.js')
+	.pipe(browserify())
+	.pipe(gulp.dest('./build/js'));
+});
+
+
+
 gulp.task('scripts', function() {
 	//single entry point to browserify
-	gulp.src(['src/index.js'])
+	gulp.src(['src/js/*.js'])
 		.pipe(browserify({
 		  insertGlobals : true,
 		  debug : true
 		}))
 		.pipe(concat('dest.js'))
-		.pipe(gulp.dest('./build'))
+		.pipe(gulp.dest('./build/js'))
 });
 
 gulp.task('default', function() {
@@ -33,15 +63,9 @@ gulp.task('default', function() {
 });
 ```
 
-*Note* : Supports streams too, pass `{buffer : false}` as option to `gulp.src()`
+You can view more examples in the [example folder.](https://github.com/stevelacy/gulp-browserify/tree/master/examples)
 
 ### Options
-
-#### noParse
-
-Type : `[String]`
-
-Array of file paths that Browserify should not attempt to parse for require() statements, which should improve compilation time for large library files that do not need to be parsed.
 
 #### transform
 
@@ -108,3 +132,28 @@ Event triggered just before invoking `bundler.bundle()` and provides bundler obj
 ```
 
 Event triggered after the bundle process is over and provides the bundled data as arguemnt to the callback.
+
+
+
+#License
+
+Copyright (c) 2014 Robo (deepak1556) https://github.com/deepak1556
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
