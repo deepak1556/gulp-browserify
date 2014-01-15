@@ -4,10 +4,9 @@ var browserify = require('browserify');
 var shim = require('browserify-shim');
 var path = require('path');
 
-module.exports = function(opts) {
-
+module.exports = function(opts, data) {
   if(!opts) opts = {};
-  var data = {};
+  if(!data) data = {};
   var buffer = [];
   var temp = [];
   var bundler = '';
@@ -25,7 +24,15 @@ module.exports = function(opts) {
       data.entries = es.readArray(temp);
       data.basedir = file.base;
 
-      
+      if(opts.noParse) {
+          data.noParse = opts.noParse;
+          delete opts.noParse;
+      }
+
+      if(opts.extensions) {
+          data.extensions = opts.extensions;
+          delete opts.extensions;
+      }
 
       if(opts.transform) opts.transform.forEach(function(transform){
         bundler.transform(transform);
