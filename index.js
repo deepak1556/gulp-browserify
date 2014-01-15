@@ -36,7 +36,7 @@ module.exports = function(opts) {
     var opts = opts || {};
     var ctrOpts = {};
     var buffer = [];
-    var bundler, chunk = '';
+    var bundler;
     var doneCount = 0;
     var itsABuffer = false;
     var itsAStream = false;
@@ -99,6 +99,8 @@ module.exports = function(opts) {
             }
 
             self.emit('prebundle', bundler);
+
+            var chunk = '';
 
             var onBundleComplete = function(self, err, src) {
                 if(err) {

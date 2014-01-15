@@ -137,17 +137,53 @@ describe('gulp-browserify external with buffer', function () {
 		var testFile = path.join(__dirname, './test.js');
 		var files = [];
 		gulp.src(testFile) // `gulp.src` defaults to buffer contents.
-				.pipe(gulpB())
-				.on('prebundle', function (bundler) {
-					bundler.external('gulp');
-				})
-				.on('data', function (file) {
-					files.push(file);
-				})
-				.on('end', function () {
-					expect(files.length).to.eq(1);
-					expect(files[0].contents.length).to.be.lessThan(1000);
-					done();
-				});
+			.pipe(gulpB())
+			.on('prebundle', function (bundler) {
+				bundler.external('gulp');
+			})
+			.on('data', function (file) {
+				files.push(file);
+			})
+			.on('end', function () {
+				expect(files.length).to.eq(1);
+				expect(files[0].contents.length).to.be.lessThan(1000);
+				done();
+			});
+	});
+});
+
+describe('gulp-browserify multiple entry points', function () {
+	it('should emits multiple bundled scripts', function (done) {
+		var testFile = path.join(__dirname, './test.js');
+		var anotherFile = path.join(__dirname, './another.js');
+		var files = [];
+		gulp.src([testFile, anotherFile])
+			.pipe(gulpB())
+			.on('data', function (file) {
+				files.push(file);
+			})
+			.on('end', function () {
+				expect(files.length).to.eq(2);
+				expect(files[0].contents.length).to.eq(725186);
+				expect(files[1].contents.length).to.eq(725186);
+				done();
+			});
+	});
+});
+
+describe('gulp-browserify noParse', function () {
+	it('should not parse or browserify noParse module', function (done) {
+		var testFile = path.join(__dirname, './test.js');
+		var files = [];
+		gulp.src(testFile)
+			.pipe(gulpB({ noParse: 'gulp' }))
+			.on('data', function (file) {
+				files.push(file);
+			})
+			.on('end', function () {
+				expect(files.length).to.eq(1);
+				expect(files[0].contents.length).to.eq(2089);
+				done();
+			});
 	});
 });
