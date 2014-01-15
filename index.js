@@ -14,18 +14,22 @@ function error(str) {
 	gutil.log('gulp-browserify: ', gutil.colors.red(str));
 }
 
+// A readable stream that emits items in a given array.
+util.inherits(ArrayStream, stream.Readable);
 
-// A readable stream that emits a single buffer.
-util.inherits(BufferStream, stream.Readable);
-
-function BufferStream(buffer) {
+function ArrayStream(items) {
     stream.Readable.call(this, { objectMode: true });
-    this._buffer = buffer;
+    this._items = items;
+    this._index = 0;
 }
 
-BufferStream.prototype._read = function (size) {
-    this.push(this._buffer);
-    this.push(null);
+ArrayStream.prototype._read = function (size) {
+    if (this._index < this._items.length) {
+        this.push(this._items[this._index]);
+        this._index ++;
+    } else {
+        this.push(null);
+    }
 };
 
 module.exports = function(opts) {
@@ -33,6 +37,7 @@ module.exports = function(opts) {
     var ctrOpts = {};
     var buffer = [];
     var bundler, chunk = '';
+    var doneCount = 0;
     var itsABuffer = false;
     var itsAStream = false;
     var lib;
@@ -46,7 +51,7 @@ module.exports = function(opts) {
 
     	var self = this;
 
-    	 buffer.map(function (file) {
+    	 buffer.forEach(function (file) {
             if(isStream(file.contents)) {
 
                 itsAStream = true;
@@ -56,7 +61,7 @@ module.exports = function(opts) {
 
                 itsABuffer = true;
                 ctrOpts.basedir = file.base;
-                ctrOpts.entries = new BufferStream(file.contents);
+                ctrOpts.entries = new ArrayStream([file.contents]);
             }else {
 
                 ctrOpts.entries = path.resolve(file.path);
@@ -114,7 +119,10 @@ module.exports = function(opts) {
                 self.emit('postbundle', src);
 
                 self.emit('data', newFile);
-                self.emit('end');
+
+                if (++doneCount === buffer.length) {
+                    self.emit('end');
+                }
             }
 
             if(itsAStream || itsABuffer ) {
