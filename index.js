@@ -68,9 +68,7 @@ module.exports = function(opts) {
             }
 
             if(opts.noParse) {
-                ctrOpts.noParse = opts.noParse.map(function(filepath) {
-                    return path.resolve(filepath);
-                })
+                ctrOpts.noParse = opts.noParse;
                 delete opts.noParse;
             }
 
