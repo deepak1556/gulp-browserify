@@ -3,12 +3,31 @@ var gutil = require('gulp-util');
 var browserify = require('browserify');
 var shim = require('browserify-shim');
 var path = require('path');
+var util = require('util');
+var Readable = require('stream').Readable || require('readable-stream');
+
+function ArrayStream(items) {
+  Readable.call(this, {objectMode : true});
+  this._items = items;
+  this._index = 0;
+}
+
+util.inherits(ArrayStream, Readable);
+
+ArrayStream.prototype._read = function() {
+  if(this._index < this._items.length) {
+    this.push(this._items[this._index]);
+    this._index++;
+  } else {
+    this.push(null);
+  }
+}
 
 module.exports = function(opts, data) {
   if(!opts) opts = {};
   if(!data) data = {};
   var buffer = [];
-  var temp = [];
+  var doneCount = 0;
   var bundler = '';
 
 
@@ -16,12 +35,11 @@ module.exports = function(opts, data) {
     if (buffer.length === 0) return this.emit('end');
     var self = this;
 
-    buffer.map(function (file) {
+    buffer.forEach(function (file) {
       if (file.isNull()) return null, file; // pass along
       if (file.isStream()) return new Error('Streams not supported');
 
-      temp.push(file.contents);
-      data.entries = es.readArray(temp);
+      data.entries = new ArrayStream([file.contents]);
       data.basedir = file.base;
 
       if(opts.noParse) {
@@ -62,7 +80,11 @@ module.exports = function(opts, data) {
 
         self.emit('postbundle', src);
         self.emit('data', newFile);
-        self.emit('end');
+
+        if(++doneCount === buffer.length) {
+          self.emit('end');  
+        }
+        
       }));
     });
   }
