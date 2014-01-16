@@ -50,6 +50,14 @@ describe('gulp-browserify', function() {
     }).end(fakeFile);
 	});
 
+  it('should return a browserify require file without entry point contents', function(done) {
+    var fakeFile = createFakeFile('normal.js', null);
+    gulpB().once('data', function(bundled) {
+      expect(bundled.contents.toString()).to.equal(fs.readFileSync('test/expected/normal.js', 'utf8'));
+      done();
+    }).end(fakeFile);
+  });
+
   it('should bundles multiple entry points', function(done) {
     var fakeFile1 = createFakeFile('normal.js', fs.readFileSync('test/fixtures/normal.js'));
     var fakeFile2 = createFakeFile('normal2.js', fs.readFileSync('test/fixtures/normal2.js'));
