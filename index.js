@@ -28,34 +28,37 @@ module.exports = function(opts, data) {
   if(!data) data = {};
   var buffer = [];
   var doneCount = 0;
-  var bundler = '';
 
+  if(opts.noParse) {
+      data.noParse = opts.noParse;
+      delete opts.noParse;
+  }
+
+  if(opts.extensions) {
+      data.extensions = opts.extensions;
+      delete opts.extensions;
+  }
 
   function bundleBrowserify() {
     if (buffer.length === 0) return this.emit('end');
     var self = this;
 
     buffer.forEach(function (file) {
-      if (file.isNull()) return null, file; // pass along
       if (file.isStream()) return new Error('Streams not supported');
 
-      data.entries = new ArrayStream([file.contents]);
+      // browserify accepts file path or stream.
+
+      if(file.isNull()) {
+        data.entries = file.path;
+      }
+
+      if(file.isBuffer()) {
+        data.entries = new ArrayStream([file.contents]);
+      }
+
       data.basedir = file.base;
 
-      if(opts.noParse) {
-          data.noParse = opts.noParse;
-          delete opts.noParse;
-      }
-
-      if(opts.extensions) {
-          data.extensions = opts.extensions;
-          delete opts.extensions;
-      }
-
-      if(opts.transform) opts.transform.forEach(function(transform){
-        bundler.transform(transform);
-      });
-        
+      var bundler;
       if(opts.shim) {
         for(var lib in opts.shim) {
             opts.shim[lib].path = path.resolve(opts.shim[lib].path);
@@ -67,6 +70,10 @@ module.exports = function(opts, data) {
         bundler = browserify(data);
         bundler.on('error', self.emit.bind(this, 'error'));
       }
+
+      if(opts.transform) opts.transform.forEach(function(transform){
+        bundler.transform(transform);
+      });
 
       self.emit('prebundle', bundler);
       

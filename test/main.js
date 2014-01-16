@@ -1,6 +1,7 @@
 var fs = require('fs');
 var path = require('path');
 var gutil = require('gulp-util');
+var coffeeify = require('coffeeify');
 var expect = require('chai').expect;
 
 var gulpB = require('../');
@@ -121,4 +122,17 @@ describe('gulp-browserify', function() {
     }).end(fakeFile);
   });
 
+  it('should transform files without entry contents', function(done) {
+    // Don't set file contents. Browserify names stream entry as `fake_xxx.js`
+    // but coffeify does not work with `.js` files.
+    // Without contents, gulp-browserify passes file path to browserify
+    // and browserify can reads file from th e given path.
+    var fakeFile = createFakeFile('transform.coffee', null);
+    var opts = { transform: ['coffeeify'], extensions: ['.coffee'] };
+    gulpB(opts).once('data', function (bundled) {
+      expect(bundled.contents.toString()).to.match(/foo: 'Foo!'/);
+      expect(bundled.contents.toString()).to.match(/bar: 'Bar!'/);
+      done();
+    }).end(fakeFile);
+  });
 });

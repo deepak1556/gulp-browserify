@@ -6,16 +6,17 @@
   "repository": "https://github.com/deepak1556/gulp-browserify",
   "author": "Robo <hop2deep@gmail.com>",
   "contributors": [
-  	"Robo <hop2deep@gmail.com>",
-	"Steve Lacy <me@slacy.me>",
-	"Shuhei Kagawa <shuhei.kagawa@gmail.com>"
+    "Robo <hop2deep@gmail.com>",
+    "Steve Lacy <me@slacy.me>",
+    "Shuhei Kagawa <shuhei.kagawa@gmail.com>"
   ],
   "dependencies": {
     "browserify": "~3.14.1",
     "event-stream": "~3.1.0",
     "gulp-util": "~2.2.5",
     "browserify-shim": "~2.0.10",
-    "readable-stream": "~1.1.10"
+    "readable-stream": "~1.1.10",
+    "coffeeify": "~0.5.2"
   },
   "main": "index.js",
   "engines": {
