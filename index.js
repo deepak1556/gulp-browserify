@@ -52,9 +52,7 @@ module.exports = function(opts, data) {
           delete opts.extensions;
       }
 
-      if(opts.transform) opts.transform.forEach(function(transform){
-        bundler.transform(transform);
-      });
+      
         
       if(opts.shim) {
         for(var lib in opts.shim) {
@@ -67,7 +65,11 @@ module.exports = function(opts, data) {
         bundler = browserify(data);
         bundler.on('error', self.emit.bind(this, 'error'));
       }
-
+      
+      if(opts.transform) opts.transform.forEach(function(transform){
+        bundler.transform(transform);
+      });
+      
       self.emit('prebundle', bundler);
       
       var bStream = bundler.bundle(opts);
