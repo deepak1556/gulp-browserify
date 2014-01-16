@@ -1,6 +1,7 @@
 var fs = require('fs');
 var path = require('path');
 var gutil = require('gulp-util');
+var coffeeify = require('coffeeify');
 var expect = require('chai').expect;
 
 var gulpB = require('../');
@@ -48,6 +49,31 @@ describe('gulp-browserify', function() {
       done();
     }).end(fakeFile);
 	});
+
+  it('should return a browserify require file without entry point contents', function(done) {
+    var fakeFile = createFakeFile('normal.js', null);
+    gulpB().once('data', function(bundled) {
+      expect(bundled.contents.toString()).to.equal(fs.readFileSync('test/expected/normal.js', 'utf8'));
+      done();
+    }).end(fakeFile);
+  });
+
+  it('should bundles multiple entry points', function(done) {
+    var fakeFile1 = createFakeFile('normal.js', fs.readFileSync('test/fixtures/normal.js'));
+    var fakeFile2 = createFakeFile('normal2.js', fs.readFileSync('test/fixtures/normal2.js'));
+    var files = {};
+    var B = gulpB().on('data', function(bundled) {
+      // Order is not guaranteed. Let's keep it with file name.
+      files[path.basename(bundled.path)] = bundled;
+    }).on('end', function() {
+      expect(Object.keys(files).length).to.equal(2);
+      expect(files['normal.js'].contents.toString()).to.equal(fs.readFileSync('test/expected/normal.js', 'utf8'));
+      expect(files['normal2.js'].contents.toString()).to.equal(fs.readFileSync('test/expected/normal2.js', 'utf8'));
+      done();
+    });
+    B.write(fakeFile1);
+    B.end(fakeFile2);
+  });
 
 	it('should use the file modified through gulp', function(done) {
     var fakeFile = createFakeFile('normal.js', new Buffer("var test = 'test';"));
@@ -121,4 +147,17 @@ describe('gulp-browserify', function() {
     }).end(fakeFile);
   });
 
+  it('should transform files without entry contents', function(done) {
+    // Don't set file contents. Browserify names stream entry as `fake_xxx.js`
+    // but coffeify does not work with `.js` files.
+    // Without contents, gulp-browserify passes file path to browserify
+    // and browserify can reads file from th e given path.
+    var fakeFile = createFakeFile('transform.coffee', null);
+    var opts = { transform: ['coffeeify'], extensions: ['.coffee'] };
+    gulpB(opts).once('data', function (bundled) {
+      expect(bundled.contents.toString()).to.match(/foo: 'Foo!'/);
+      expect(bundled.contents.toString()).to.match(/bar: 'Bar!'/);
+      done();
+    }).end(fakeFile);
+  });
 });

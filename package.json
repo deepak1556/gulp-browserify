@@ -6,9 +6,9 @@
   "repository": "https://github.com/deepak1556/gulp-browserify",
   "author": "Robo <hop2deep@gmail.com>",
   "contributors": [
-  	"Robo <hop2deep@gmail.com>",
-	"Steve Lacy <me@slacy.me>",
-	"Shuhei Kagawa <shuhei.kagawa@gmail.com>"
+    "Robo <hop2deep@gmail.com>",
+    "Steve Lacy <me@slacy.me>",
+    "Shuhei Kagawa <shuhei.kagawa@gmail.com>"
   ],
   "dependencies": {
     "browserify": "~3.14.1",
@@ -26,7 +26,8 @@
   },
   "devDependencies": {
     "mocha": "~1.15.1",
-    "chai": "~1.8.1"
+    "chai": "~1.8.1",
+    "coffeeify": "~0.5.2"
   },
   "keywords": [
     "gulpplugin",
