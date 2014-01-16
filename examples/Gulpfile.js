@@ -1,9 +1,8 @@
 var gulp = require('gulp');
 var browserify = require('../');
-var concat = require('gulp-concat');
 
 gulp.task('scripts', function(){
-  gulp.src('./src/normal.js')
+  gulp.src('../test/fixtures/normal.js')
   .pipe(browserify())
   .pipe(gulp.dest('./build'));
 });

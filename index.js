@@ -55,6 +55,7 @@ module.exports = function(opts, data) {
       if(opts.transform) opts.transform.forEach(function(transform){
         bundler.transform(transform);
       });
+        
       if(opts.shim) {
         for(var lib in opts.shim) {
             opts.shim[lib].path = path.resolve(opts.shim[lib].path);
