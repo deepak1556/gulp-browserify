@@ -15,9 +15,6 @@ function createFakeFile(filename, contents) {
 }
 
 describe('gulp-browserify', function() {
-  var fixtureBuffer = fs.readFileSync('test/fixtures/normal.js');
-  var expectedString = fs.readFileSync('test/expected/normal.js', 'utf8');
-
   it('should return files', function(done) {
     var fakeFile = createFakeFile('normal.js', new Buffer("var test = 'test';"));
     gulpB().once('data', function(bundled){
@@ -29,7 +26,6 @@ describe('gulp-browserify', function() {
   it('should return a buffer', function(done) {
     var fakeFile = createFakeFile('normal.js', new Buffer("var test = 'test';"));
     gulpB().once('data', function(bundled){
-      expect(bundled).to.exist;
       expect(bundled.contents).to.be.an.instanceof(Buffer);
       done();
     }).end(fakeFile);
@@ -46,9 +42,9 @@ describe('gulp-browserify', function() {
   });
 
   it('should return a browserify require file', function(done) {
-    var fakeFile = createFakeFile('normal.js', fixtureBuffer);
+    var fakeFile = createFakeFile('normal.js', fs.readFileSync('test/fixtures/normal.js'));
     gulpB().once('data', function(bundled) {
-      expect(bundled.contents.toString()).to.equal(expectedString);
+      expect(bundled.contents.toString()).to.equal(fs.readFileSync('test/expected/normal.js', 'utf8'));
       done();
     }).end(fakeFile);
 	});
@@ -62,13 +58,15 @@ describe('gulp-browserify', function() {
   });
 
   it('should shim files', function(done) {
-    var fakeFile = new gutil.File({
-      cwd: process.cwd(),
-      base: path.join(__dirname, 'fixtures'),
-      path: path.join(__dirname, "fixtures/shim.js"),
-      contents: fs.readFileSync('test/fixtures/shim.js')
-    });
-    var opts = {shim: {bar: {path: 'test/fixtures/bar.js', exports: 'bar'}}};
+    var fakeFile = createFakeFile('shim.js', fs.readFileSync('test/fixtures/shim.js'));
+    var opts = {
+      shim: {
+        bar: {
+          path: 'test/fixtures/bar.js',
+          exports: 'bar'
+        }
+      }
+    };
     gulpB(opts).once('data', function(bundled){
       expect(bundled.contents.toString()).to.match(/window.bar = \'foobar\'/);
       done();
@@ -76,22 +74,17 @@ describe('gulp-browserify', function() {
   });
 
   it('should emit postbundle event', function(done) {
-    var fakeFile = createFakeFile('normal.js', fixtureBuffer);
+    var fakeFile = createFakeFile('normal.js', fs.readFileSync('test/fixtures/normal.js'));
     gulpB().once('data', function(bundled) {
       expect(bundled.contents).to.exist;
       done();
     }).on('postbundle', function(data) {
-      expect(data.toString()).to.equal(expectedString);
+      expect(data.toString()).to.equal(fs.readFileSync('test/expected/normal.js', 'utf8'));
     }).end(fakeFile);
   });
 
   it('should use extensions', function(done) {
-    var fakeFile = new gutil.File({
-      cwd: process.cwd(),
-      base: path.join(__dirname, 'fixtures'),
-      path: path.join(__dirname, "fixtures/extension.js"),
-      contents: fs.readFileSync('test/fixtures/extension.js')
-    });
+    var fakeFile = createFakeFile('extension.js', fs.readFileSync('test/fixtures/extension.js'));
     var opts = { extensions: ['.foo', '.bar'] };
     gulpB(opts).once('data', function(bundled){
       expect(bundled.contents.toString()).to.match(/foo: 'Foo!'/);
@@ -101,12 +94,7 @@ describe('gulp-browserify', function() {
   });
 
   it('should not parse with noParse', function(done) {
-    var fakeFile = new gutil.File({
-      cwd: process.cwd(),
-      base: path.join(__dirname, 'fixtures'),
-      path: path.join(__dirname, 'fixtures/normal.js'),
-      contents: fs.readFileSync('test/fixtures/normal.js')
-    });
+    var fakeFile = createFakeFile('normal.js', fs.readFileSync('test/fixtures/normal.js'));
     var files = [];
     gulpB({noParse: 'chai'}).on('data', function(bundled){
       files.push(bundled);
@@ -119,12 +107,7 @@ describe('gulp-browserify', function() {
   });
 
   it('should allow external with buffer', function(done) {
-    var fakeFile = new gutil.File({
-      cwd: process.cwd(),
-      base: path.join(__dirname, 'fixtures'),
-      path: path.join(__dirname, 'fixtures/normal.js'),
-      contents: fs.readFileSync('test/fixtures/normal.js')
-    });
+    var fakeFile = createFakeFile('normal.js', fs.readFileSync('test/fixtures/normal.js'));
     var files = [];
     gulpB().on('prebundle', function(bundler) {
       bundler.external('chai');
