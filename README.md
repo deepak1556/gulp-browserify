@@ -36,7 +36,6 @@ npm install gulp-browserify --save
 ```javascript
 var gulp = require('gulp');
 var browserify = require('gulp-browserify');
-var concat = require('gulp-concat');
 
 // Basic usage
 gulp.task('basic', function(){
@@ -54,7 +53,6 @@ gulp.task('scripts', function() {
 		  insertGlobals : true,
 		  debug : true
 		}))
-		.pipe(concat('dest.js'))
 		.pipe(gulp.dest('./build/js'))
 });
 
