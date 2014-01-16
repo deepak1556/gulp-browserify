@@ -92,24 +92,31 @@ Array of extensions that you want to skip in `require()` calls in addition to `.
 Any other options you provide will be passed through to browserify. This is useful for setting things like `standalone` or `ignoreGlobals`.
 
 ### Browserify-Shim
-
+Example configuration
 ```javascript
 gulp.task('scripts', function() {
 	//single entry point to browserify
 	gulp.src(['src/index.js'])
 		.pipe(browserify({
-		  shim : {
-		    lib : {
-		  		path : `/path/to/shimfile`
-		  		exports : 
-		    }
+		  shim: {
+		    angular: {
+                path: '/vendor/angular/angular.js',
+                exports: 'angular'
+		    },
+            'angular-route': {
+                path: '/vendor/angular-route/angular-route.js',
+                exports: 'ngRoute',
+                depends: {
+                    angular: 'angular'
+                }
+            }
 		  }
 		}))
 		.pipe(concat('dest.js'))
 		.pipe(gulp.dest('./build'))
 });
-
 ```
+More information about configuring browserify-shim can be found [here](https://github.com/thlorenz/browserify-shim/blob/97d416cb3bc2ef531fae05a8eed4c86700ba4dc8/README.md).
 
 ### Events
 
