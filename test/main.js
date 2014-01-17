@@ -5,6 +5,7 @@ var coffeeify = require('coffeeify');
 var expect = require('chai').expect;
 
 var gulpB = require('../');
+var prepare = require('./prepare');
 
 function createFakeFile(filename, contents) {
   return new gutil.File({
@@ -16,6 +17,10 @@ function createFakeFile(filename, contents) {
 }
 
 describe('gulp-browserify', function() {
+  before(function (done) {
+    prepare(['normal.js', 'normal2.js'], done);
+  });
+
   it('should return files', function(done) {
     var fakeFile = createFakeFile('normal.js', new Buffer("var test = 'test';"));
     gulpB().once('data', function(bundled){
@@ -157,6 +162,15 @@ describe('gulp-browserify', function() {
     gulpB(opts).once('data', function (bundled) {
       expect(bundled.contents.toString()).to.match(/foo: 'Foo!'/);
       expect(bundled.contents.toString()).to.match(/bar: 'Bar!'/);
+      done();
+    }).end(fakeFile);
+  });
+
+  it('should emit error when bundle throws error', function(done) {
+    var fakeFile = createFakeFile('trans_error.coffee', null);
+    var opts = { transform: ['coffeeify'], extensions: ['.coffee'] };
+    gulpB(opts).once('error', function (err) {
+      expect(err).to.exist;
       done();
     }).end(fakeFile);
   });

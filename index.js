@@ -58,27 +58,30 @@ module.exports = function(opts, data) {
 
       data.basedir = file.base;
 
-      var bundler;
+      var bundler = browserify(data);
+
       if(opts.shim) {
         for(var lib in opts.shim) {
             opts.shim[lib].path = path.resolve(opts.shim[lib].path);
         }
-        bundler = shim(browserify(), opts.shim);
-        bundler.require(file.path, { entry: true });
+        bundler = shim(bundler, opts.shim);
       }
-      else{
-        bundler = browserify(data);
-        bundler.on('error', self.emit.bind(this, 'error'));
-      }
+
+      bundler.on('error', self.emit.bind(self, 'error'));
 
       if(opts.transform) opts.transform.forEach(function(transform){
         bundler.transform(transform);
       });
 
       self.emit('prebundle', bundler);
-      
+
       var bStream = bundler.bundle(opts);
+      bStream.on('error', self.emit.bind(self, 'error'));
       bStream.pipe(es.wait(function(err, src){
+        if(err) {
+          return self.emit('error', err)
+        }
+
         var newFile = new gutil.File({
           cwd: file.cwd,
           base: file.base,
@@ -90,9 +93,8 @@ module.exports = function(opts, data) {
         self.emit('data', newFile);
 
         if(++doneCount === buffer.length) {
-          self.emit('end');  
+          self.emit('end');
         }
-        
       }));
     });
   }
