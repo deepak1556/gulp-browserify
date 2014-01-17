@@ -1,4 +1,5 @@
 var es = require('event-stream');
+var through = require('through2');
 var gutil = require('gulp-util');
 var browserify = require('browserify');
 var shim = require('browserify-shim');
@@ -26,8 +27,6 @@ ArrayStream.prototype._read = function() {
 module.exports = function(opts, data) {
   if(!opts) opts = {};
   if(!data) data = {};
-  var buffer = [];
-  var doneCount = 0;
 
   if(opts.noParse) {
       data.noParse = opts.noParse;
@@ -39,64 +38,59 @@ module.exports = function(opts, data) {
       delete opts.extensions;
   }
 
-  function bundleBrowserify() {
-    if (buffer.length === 0) return this.emit('end');
+  function transform(file, enc, cb) {
     var self = this;
+    var bundler;
 
-    buffer.forEach(function (file) {
-      if (file.isStream()) return new Error('Streams not supported');
+    if (file.isStream()) return cb(new Error('Streams not supported'));
 
-      // browserify accepts file path or stream.
+    // browserify accepts file path or stream.
 
-      if(file.isNull()) {
-        data.entries = file.path;
+    if(file.isNull()) {
+      data.entries = file.path;
+    }
+
+    if(file.isBuffer()) {
+      data.entries = new ArrayStream([file.contents]);
+    }
+
+    data.basedir = file.base;
+
+    var bundler = browserify(data);
+
+    if(opts.shim) {
+      for(var lib in opts.shim) {
+          opts.shim[lib].path = path.resolve(opts.shim[lib].path);
+      }
+      bundler = shim(bundler, opts.shim);
+    }
+
+    bundler.on('error', cb);
+
+    if(opts.transform) opts.transform.forEach(function(transform){
+      bundler.transform(transform);
+    });
+
+    self.emit('prebundle', bundler);
+
+    var bStream = bundler.bundle(opts);
+    bStream.on('error', cb);
+    bStream.pipe(es.wait(function(err, src){
+      if(err) {
+        return cb(err);
       }
 
-      if(file.isBuffer()) {
-        data.entries = new ArrayStream([file.contents]);
-      }
-
-      data.basedir = file.base;
-
-      var bundler = browserify(data);
-
-      if(opts.shim) {
-        for(var lib in opts.shim) {
-            opts.shim[lib].path = path.resolve(opts.shim[lib].path);
-        }
-        bundler = shim(bundler, opts.shim);
-      }
-
-      bundler.on('error', self.emit.bind(self, 'error'));
-
-      if(opts.transform) opts.transform.forEach(function(transform){
-        bundler.transform(transform);
+      var newFile = new gutil.File({
+        cwd: file.cwd,
+        base: file.base,
+        path: file.path,
+        contents: new Buffer(src)
       });
 
-      self.emit('prebundle', bundler);
-
-      var bStream = bundler.bundle(opts);
-      bStream.on('error', self.emit.bind(self, 'error'));
-      bStream.pipe(es.wait(function(err, src){
-        if(err) {
-          return self.emit('error', err)
-        }
-
-        var newFile = new gutil.File({
-          cwd: file.cwd,
-          base: file.base,
-          path: file.path,
-          contents: new Buffer(src)
-        });
-
-        self.emit('postbundle', src);
-        self.emit('data', newFile);
-
-        if(++doneCount === buffer.length) {
-          self.emit('end');
-        }
-      }));
-    });
+      self.emit('postbundle', src);
+      self.push(newFile);
+      cb();
+    }));
   }
-  return es.through(buffer.push.bind(buffer), bundleBrowserify);
+  return through.obj(transform);
 };
