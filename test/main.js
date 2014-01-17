@@ -86,6 +86,7 @@ describe('gulp-browserify', function() {
   it('should shim files', function(done) {
     var fakeFile = createFakeFile('shim.js', fs.readFileSync('test/fixtures/shim.js'));
     var opts = {
+      extensions: ['.bar'],
       shim: {
         bar: {
           path: 'test/fixtures/bar.js',
