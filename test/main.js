@@ -160,4 +160,13 @@ describe('gulp-browserify', function() {
       done();
     }).end(fakeFile);
   });
+
+  it('should emit error when bundle throws error', function(done) {
+    var fakeFile = createFakeFile('trans_error.coffee', null);
+    var opts = { transform: ['coffeeify'], extensions: ['.coffee'] };
+    gulpB(opts).once('error', function (err) {
+      expect(err).to.exist;
+      done();
+    }).end(fakeFile);
+  });
 });
