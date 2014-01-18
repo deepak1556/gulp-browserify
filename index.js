@@ -40,7 +40,6 @@ module.exports = function(opts, data) {
 
   function transform(file, enc, cb) {
     var self = this;
-    var bundler;
 
     if (file.isStream()) return cb(new Error('Streams not supported'));
 
