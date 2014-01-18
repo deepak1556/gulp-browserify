@@ -38,30 +38,18 @@ var gulp = require('gulp');
 var browserify = require('gulp-browserify');
 
 // Basic usage
-gulp.task('basic', function(){
-	gulp.src('./src/*.js')
-	.pipe(browserify())
-	.pipe(gulp.dest('./build/js'));
-});
-
-
-
 gulp.task('scripts', function() {
-	//single entry point to browserify
-	gulp.src(['src/js/*.js'])
+	// Single entry point to browserify
+	gulp.src('src/js/app.js')
 		.pipe(browserify({
 		  insertGlobals : true,
-		  debug : true
+		  debug : !gulp.env.production
 		}))
 		.pipe(gulp.dest('./build/js'))
 });
-
-gulp.task('default', function() {
-	gulp.run('scripts');
-});
 ```
 
-You can view more examples in the [example folder.](https://github.com/stevelacy/gulp-browserify/tree/master/examples)
+Make sure to pipe *only entry points*. Browserify will take care of other dependencies for you.
 
 ### Options
 
@@ -69,17 +57,35 @@ You can view more examples in the [example folder.](https://github.com/stevelacy
 
 Type : `[String || function]`
 
-Specifies a pipeline of functions (or modules) through which the browserified bundle will be run. 
+Specifies a pipeline of functions (or module names) through which the browserified bundle will be run. Check out [the list of transforms on node-browserify](https://github.com/substack/node-browserify#list-of-source-transforms).
 
-Transforms may not support input streams of browserify, since a temporary file is created to hold the contents of the input stream.
+##### Languages that compile to JavaScript
 
-For example, coffeeify expects the file input to end with `.coffee` or `.litcoffee` extension. However the temp file create by browserify has a `.js` extension. Instead, use [gulp-coffee](https://github.com/wearefractal/gulp-coffee) to transform the input file contents before piping into gulp-browserify. Or you can stick with coffeeify using `gulp.src('./index.js', { read: false })` to preserve extension and giving `['.coffee', '.litcoffee']` to `extensions` option.
+If you want to bundle files with extensions other than `.js` or `.json`, omit contents from streamed files and set `extensions` option.
+
+Let's say you want to browserify CoffeeScript, install `coffeeify` and:
+
+```javascript
+var gulp = require('gulp');
+var browserify = require('gulp-browserify');
+
+gulp.task('coffee', function() {
+  gulp.src('src/coffee/app.coffee', { read: false })
+    .pipe(browserify({
+      transform: ['coffeeify'],
+      extensions: ['.coffee']
+    }))
+    .pipe(gulp.dest('./build/js'))
+});
+```
+
+If you forget `{ read: false }`, gulp-browserify will passes the contents stream of a incoming file to node-browserify. Then node-browserify names the stream as `fake_xxx.js` and process it. Some transforms such as `coffeeify` determines whether to transform files with extensions. That is why you need `{ read: false }` for AltJS.
 
 #### debug
 
 Type : `Boolean`
 
-Enable source map support
+Enable source map support. `!gulp.env.production` would work well.
 
 #### extensions
 
@@ -87,12 +93,16 @@ Type: `[String]`
 
 Array of extensions that you want to skip in `require()` calls in addition to `.js` and `.json`. Don't forget `.`.
 
+With `{ extensions: ['.coffee'] }`, you can do `require('app')`. Instead, you have to do `require('app.coffee')`.
+
 #### Other Options
 
 Any other options you provide will be passed through to browserify. This is useful for setting things like `standalone` or `ignoreGlobals`.
 
 ### Browserify-Shim
+
 Example configuration
+
 ```javascript
 gulp.task('scripts', function() {
 	//single entry point to browserify
@@ -120,7 +130,7 @@ More information about configuring browserify-shim can be found [here](https://g
 
 ### Events
 
-Other than standard Node.js stream events, gulp-browserify emit its own events.
+Other than standard Node.js stream events, gulp-browserify emits its own events.
 
 #### prebundle
 
@@ -128,7 +138,24 @@ Other than standard Node.js stream events, gulp-browserify emit its own events.
 .on('prebundle', function(bundler){})
 ```
 
-Event triggered just before invoking `bundler.bundle()` and provides bundler object to work with in the callback.
+Event triggered just before invoking `bundler.bundle()` and provides the bundler object to work with in the callback.
+
+This is especially useful if you want to `require()`, `external()` or other methods of node-browserify.
+
+```javascript
+gulp.task('scripts', function() {
+  gulp.src('src/js/app.js')
+    .pipe(browserify({
+      insertGlobals : true,
+      debug : !gulp.env.production
+    }))
+    .on('prebundle', function(bundle) {
+      bundle.external('domready');
+      bundle.external('react');
+    })
+    .pipe(gulp.dest('./build/js'))
+});
+```
 
 #### postbundle
 
@@ -136,7 +163,7 @@ Event triggered just before invoking `bundler.bundle()` and provides bundler obj
 .on('postbundle', function(src){})
 ```
 
-Event triggered after the bundle process is over and provides the bundled data as arguemnt to the callback.
+Event triggered after the bundle process is over and provides the bundled data as an argument to the callback.
 
 
 
