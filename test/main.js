@@ -1,6 +1,7 @@
 var gulp = require('gulp');
 var gconcat = require('gulp-concat');
 var gulpB = require('../');
+var gutil = require('gulp-util');
 var expect = require('chai').expect;
 var es = require('event-stream');
 var path = require('path');
@@ -9,6 +10,26 @@ var Stream = require('stream');
 var browserify = require('browserify');
 
 describe('gulp-browserify', function() {
+
+  it('should let null files pass through', function(done) {
+
+      var s = gulpB()
+        , n = 0;
+      s.pipe(es.through(function(file) {
+          expect(file.path).to.equal('bibabelula.foo');
+          expect(file.contents).to.equal(null);
+          n++;
+        }, function() {
+          expect(n).to.equal(1);
+          done();
+        }));
+      s.write(new gutil.File({
+        path: 'bibabelula.foo',
+        contents: null
+      }));
+      s.end();
+
+  })
 
   describe('in buffer mode',function() {
 
@@ -64,7 +85,7 @@ describe('gulp-browserify', function() {
           done();
         }))
     })
-  
+
   })
 
   describe('in stream mode',function() {

@@ -13,7 +13,11 @@ function gulpBrowserify(opts) {
     var stream = new Stream.Transform({objectMode: true});
 
     stream._transform = function(file, unused, done) {
-        if(file.isNull()) return done(); // Do nothing
+        // When null just pass through
+        if(file.isNull()) {
+            stream.push(file); done();
+            return;
+        }
 
         // Convert buffer to stream
         if(file.isBuffer()) {
