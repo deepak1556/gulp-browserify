@@ -95,6 +95,16 @@ Array of extensions that you want to skip in `require()` calls in addition to `.
 
 With `{ extensions: ['.coffee'] }`, you can do `require('app')`. Instead, you have to do `require('app.coffee')`.
 
+#### resolve
+
+Type: `Function`
+
+Custom module name resolution function. From [node-browserify](https://github.com/substack/node-browserify#var-b--browserifyfiles-or-opts) documentation:
+> You can give browserify a custom `opts.resolve()` function or by default it uses
+[`browser-resolve`](https://npmjs.org/package/browser-resolve).
+
+Obviously, this function must implement the same API as [browser-resolve](https://npmjs.org/package/browser-resolve).
+
 #### Other Options
 
 Any other options you provide will be passed through to browserify. This is useful for setting things like `standalone` or `ignoreGlobals`.

@@ -137,6 +137,23 @@ describe('gulp-browserify', function() {
     }).end(fakeFile);
   });
 
+  it('should use custom resolve function', function(done) {
+    // Use new Buffer instead of normal.js contents because normal.js
+    // requires "chai", and if this test fails (resolve function not used)
+    // all the chai will be printed to stdout (when .to.match() fails),
+    // that's annoying, trust me. And new fixture file for this is overkill.
+    var fakeFile = createFakeFile('fake.js', new Buffer('require("fake");'));
+    var opts = {
+      resolve: function(pkg, opts, cb) {
+        cb(null, path.resolve('./test/fixtures/custom_resolved.js'));
+      }
+    };
+    gulpB(opts).once('data', function(bundled) {
+      expect(bundled.contents.toString()).to.match(/resolved content/);
+      done();
+    }).end(fakeFile);
+  });
+
   it('should allow external with buffer', function(done) {
     var fakeFile = createFakeFile('normal.js', fs.readFileSync('test/fixtures/normal.js'));
     var files = [];

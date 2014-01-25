@@ -29,15 +29,12 @@ module.exports = function(opts, data) {
   var buffer = [];
   var doneCount = 0;
 
-  if(opts.noParse) {
-      data.noParse = opts.noParse;
-      delete opts.noParse;
-  }
-
-  if(opts.extensions) {
-      data.extensions = opts.extensions;
-      delete opts.extensions;
-  }
+  ['noParse', 'extensions', 'resolve'].forEach(function(opt) {
+    if(opts[opt]) {
+      data[opt] = opts[opt];
+      delete opts[opt];
+    }
+  });
 
   function bundleBrowserify() {
     if (buffer.length === 0) return this.emit('end');
