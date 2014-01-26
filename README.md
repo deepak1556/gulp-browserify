@@ -28,7 +28,7 @@
 ## Install
 
 ```
-npm install gulp-browserify --save
+npm install --save-dev gulp-browserify
 ```
 
 ## Example
