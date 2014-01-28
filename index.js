@@ -24,15 +24,12 @@ module.exports = function(opts, data) {
   if(!opts) opts = {};
   if(!data) data = {};
 
-  if(opts.noParse) {
-      data.noParse = opts.noParse;
-      delete opts.noParse;
-  }
-
-  if(opts.extensions) {
-      data.extensions = opts.extensions;
-      delete opts.extensions;
-  }
+  ['noParse', 'extensions', 'resolve'].forEach(function(opt) {
+    if(opts[opt]) {
+      data[opt] = opts[opt];
+      delete opts[opt];
+    }
+  });
 
   function transform(file, enc, cb) {
     var self = this;
