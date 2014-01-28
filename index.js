@@ -1,4 +1,3 @@
-var es = require('event-stream');
 var through = require('through2');
 var gutil = require('gulp-util');
 var browserify = require('browserify');
@@ -7,21 +6,18 @@ var path = require('path');
 var util = require('util');
 var Readable = require('stream').Readable || require('readable-stream');
 
-function ArrayStream(items) {
-  Readable.call(this, {objectMode : true});
-  this._items = items;
-  this._index = 0;
-}
-
-util.inherits(ArrayStream, Readable);
-
-ArrayStream.prototype._read = function() {
-  if(this._index < this._items.length) {
-    this.push(this._items[this._index]);
-    this._index++;
-  } else {
-    this.push(null);
-  }
+function arrayStream(items) {
+  var index = 0;
+  var readable = new Readable({objectMode: true});
+  readable._read = function() {
+    if(index < items.length) {
+      readable.push(items[index]);
+      index++;
+    } else {
+      readable.push(null);
+    }
+  };
+  return readable;
 }
 
 module.exports = function(opts, data) {
@@ -50,7 +46,7 @@ module.exports = function(opts, data) {
     }
 
     if(file.isBuffer()) {
-      data.entries = new ArrayStream([file.contents]);
+      data.entries = arrayStream([file.contents]);
     }
 
     data.basedir = file.base;
@@ -66,30 +62,23 @@ module.exports = function(opts, data) {
 
     bundler.on('error', cb);
 
-    if(opts.transform) opts.transform.forEach(function(transform){
+    if(opts.transform) opts.transform.forEach(function(transform) {
       bundler.transform(transform);
     });
 
     self.emit('prebundle', bundler);
 
-    var bStream = bundler.bundle(opts);
-    bStream.on('error', cb);
-    bStream.pipe(es.wait(function(err, src){
+    var bStream = bundler.bundle(opts, function(err, src) {
       if(err) {
         return cb(err);
       }
 
-      var newFile = new gutil.File({
-        cwd: file.cwd,
-        base: file.base,
-        path: file.path,
-        contents: new Buffer(src)
-      });
-
       self.emit('postbundle', src);
-      self.push(newFile);
+
+      file.contents = new Buffer(src);
+      self.push(file);
       cb();
-    }));
+    });
   }
   return through.obj(transform);
 };
