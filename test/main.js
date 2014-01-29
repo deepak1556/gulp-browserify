@@ -55,6 +55,27 @@ describe('gulp-browserify', function() {
     }).end(fakeFile);
 	});
 
+  describe ('it should handle the external option', function() {
+    it ('when specified as a string', function(done) {
+      var fakeFile = createFakeFile('external.js', fs.readFileSync('test/fixtures/extension.js'));
+      var opts = { extensions: ['.foo', '.bar'], external: './ext_bar'};
+      gulpB(opts).once('data', function(bundled){
+        expect(bundled.contents.toString()).to.match(/foo: 'Foo!'/);
+        expect(bundled.contents.toString()).to.not.match(/bar: 'Bar!'/);
+        done();
+      }).end(fakeFile);
+    });
+
+    it ('when specified as an array', function(done) {
+      var fakeFile = createFakeFile('external.js', fs.readFileSync('test/fixtures/extension.js'));
+      var opts = { extensions: ['.foo', '.bar'], external: ['./ext_bar', './ext_foo']};
+      gulpB(opts).once('data', function(bundled){
+        expect(bundled.contents.toString()).to.not.match(/foo: 'Foo!'/);
+        expect(bundled.contents.toString()).to.not.match(/bar: 'Bar!'/);
+        done();
+      }).end(fakeFile);
+    });
+  })
 
   describe ('it should handle the ignore option', function() {
     it ('when specified as a string', function(done) {
