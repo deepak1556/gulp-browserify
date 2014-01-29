@@ -2,11 +2,13 @@ var fs = require('fs');
 var path = require('path');
 var browserify = require('browserify');
 
-function fixture(filename, cb) {
+function fixture(filename, cb, opts) {
   var entry = path.resolve(__dirname, 'fixtures', filename);
-  var out = path.resolve(__dirname, 'expected', filename);
+  var out = path.resolve(__dirname, 'expected',
+                         (typeof opts !== 'undefined' && opts !== null && opts.out ? opts.out : filename));
 
   var b = browserify({ entries: entry });
+  if (opts && opts.ignore) b.ignore(opts.ignore)
   var opts = { detectGlobals: true };
   var s = b.bundle(opts);
   s.on('error', cb);
@@ -29,7 +31,12 @@ module.exports = function (entries, done) {
     }
   }
 
-  entries.forEach(function (file) {
-    fixture(file, callback);
+  entries.forEach(function (testobj) {
+    if ({}.toString.call(testobj) === '[object Object]') {
+      fixture(testobj.file, callback, testobj.opts);
+    }
+    else {
+      fixture(testobj, callback);
+    }
   });
 };

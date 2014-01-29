@@ -18,7 +18,8 @@ function createFakeFile(filename, contents) {
 
 describe('gulp-browserify', function() {
   before(function (done) {
-    prepare(['normal.js', 'normal2.js'], done);
+    prepare(['normal.js', 'normal2.js',
+            {file: 'normal.js', opts: {ignore: 'chai', out: 'ignore.js'}}], done);
   });
 
   it('should return files', function(done) {
@@ -54,6 +55,16 @@ describe('gulp-browserify', function() {
       done();
     }).end(fakeFile);
 	});
+
+  it ('should handle the ignore option', function(done) {
+    var fakeFile = createFakeFile('ignore.js', fs.readFileSync('test/fixtures/normal.js'));
+    var opts = {ignore: ['chai']}
+    gulpB(opts).once('data', function(bundled) {
+      expect(bundled.contents.toString()).to.equal(fs.readFileSync('test/expected/ignore.js', 'utf8'));
+      done();
+    }).end(fakeFile);
+  
+  });
 
   it('should return a browserify require file without entry point contents', function(done) {
     var fakeFile = createFakeFile('normal.js', null);

@@ -59,6 +59,10 @@ module.exports = function(opts, data) {
 
     bundler.on('error', cb);
 
+    if (opts.ignore) opts.ignore.forEach(function(ignore) {
+      bundler.ignore(ignore)
+    })
+
     if(opts.transform) opts.transform.forEach(function(transform) {
       bundler.transform(transform);
     });

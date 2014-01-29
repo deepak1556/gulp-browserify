@@ -74,6 +74,7 @@ gulp.task('coffee', function() {
     .pipe(browserify({
       transform: ['coffeeify'],
       extensions: ['.coffee']
+      ignore: ['']
     }))
     .pipe(gulp.dest('./build/js'))
 });
@@ -94,6 +95,12 @@ Type: `[String]`
 Array of extensions that you want to skip in `require()` calls in addition to `.js` and `.json`. Don't forget `.`.
 
 With `{ extensions: ['.coffee'] }`, you can do `require('app')`. Instead, you have to do `require('app.coffee')`.
+
+#### ignore
+Type: `[String]`
+
+Array of paths which should be passed to the ignore function of
+browserify.
 
 #### resolve
 
