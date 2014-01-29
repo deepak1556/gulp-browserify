@@ -74,7 +74,6 @@ gulp.task('coffee', function() {
     .pipe(browserify({
       transform: ['coffeeify'],
       extensions: ['.coffee']
-      ignore: ['']
     }))
     .pipe(gulp.dest('./build/js'))
 });

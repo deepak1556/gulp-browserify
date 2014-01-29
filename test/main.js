@@ -18,8 +18,7 @@ function createFakeFile(filename, contents) {
 
 describe('gulp-browserify', function() {
   before(function (done) {
-    prepare(['normal.js', 'normal2.js',
-            {file: 'normal.js', opts: {ignore: 'chai', out: 'ignore.js'}}], done);
+    prepare(['normal.js', 'normal2.js'], done);
   });
 
   it('should return files', function(done) {
