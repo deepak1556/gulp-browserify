@@ -55,14 +55,26 @@ describe('gulp-browserify', function() {
     }).end(fakeFile);
 	});
 
-  it ('should handle the ignore option', function(done) {
-    var fakeFile = createFakeFile('ignore.js', fs.readFileSync('test/fixtures/normal.js'));
-    var opts = {ignore: ['chai']}
-    gulpB(opts).once('data', function(bundled) {
-      expect(bundled.contents.toString()).to.equal(fs.readFileSync('test/expected/ignore.js', 'utf8'));
-      done();
-    }).end(fakeFile);
-  
+
+  describe ('it should handle the ignore option', function() {
+    it ('when specified as a string', function(done) {
+      var fakeFile = createFakeFile('ignore.js', fs.readFileSync('test/fixtures/extension.js'));
+      var opts = { extensions: ['.foo', '.bar'], ignore: './ext_bar'};
+      gulpB(opts).once('data', function(bundled){
+        expect(bundled.contents.toString()).to.match(/foo: 'Foo!'/);
+        expect(bundled.contents.toString()).to.not.match(/bar: 'Bar!'/);
+        done();
+      }).end(fakeFile);
+    });   
+    it ('when specified as a list', function(done) {
+      var fakeFile = createFakeFile('ignore.js', fs.readFileSync('test/fixtures/extension.js'));
+      var opts = { extensions: ['.foo', '.bar'], ignore: ['./ext_foo','./ext_bar']};
+      gulpB(opts).once('data', function(bundled){
+        expect(bundled.contents.toString()).to.not.match(/foo: 'Foo!'/);
+        expect(bundled.contents.toString()).to.not.match(/bar: 'Bar!'/);
+        done();
+      }).end(fakeFile);
+    });   
   });
 
   it('should return a browserify require file without entry point contents', function(done) {
