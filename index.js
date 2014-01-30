@@ -1,5 +1,6 @@
 var through = require('through2');
 var gutil = require('gulp-util');
+var PluginError = gutil.PluginError;
 var browserify = require('browserify');
 var shim = require('browserify-shim');
 var path = require('path');
@@ -67,13 +68,14 @@ module.exports = function(opts, data) {
 
     var bStream = bundler.bundle(opts, function(err, src) {
       if(err) {
-        return cb(err);
+        self.emit('error', new PluginError('gulp-browserify', err));
+      } else {
+        self.emit('postbundle', src);
+
+        file.contents = new Buffer(src);
+        self.push(file);
       }
-
-      self.emit('postbundle', src);
-
-      file.contents = new Buffer(src);
-      self.push(file);
+      
       cb();
     });
   }

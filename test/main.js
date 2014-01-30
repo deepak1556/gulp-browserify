@@ -188,6 +188,7 @@ describe('gulp-browserify', function() {
     var opts = { transform: ['coffeeify'], extensions: ['.coffee'] };
     gulpB(opts).once('error', function (err) {
       expect(err).to.exist;
+      expect(err).to.be.instanceof(gutil.PluginError);
       done();
     }).end(fakeFile);
   });
