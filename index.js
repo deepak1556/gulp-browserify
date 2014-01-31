@@ -59,7 +59,7 @@ module.exports = function(opts, data) {
 
     bundler.on('error', cb);
 
-    ['exclude', 'external', 'transform', 'ignore'].forEach( function(method) {
+    ['exclude', 'add', 'external', 'transform', 'ignore'].forEach( function(method) {
       if (!opts[method]) return;
       [].concat(opts[method]).forEach(function (args) {
         bundler[method].apply(bundler, [].concat(args));
