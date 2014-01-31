@@ -84,13 +84,30 @@ describe('gulp-browserify', function() {
       var opts = { exclude: ['./increment']};
 
       gulpB(opts).once('data', function(bundled){
-        sandbox = {value: 20}
+        var sandbox = {value: 20}
 
         expect(function() {
         vm.runInNewContext(bundled.contents.toString('utf8'), sandbox)
         }).to.throw("Cannot find module './increment'");
 
         expect(sandbox.value).to.equal(20)
+        done();
+
+      }).end(fakeFile);
+    });
+  });
+
+  describe ('it should handle the add option', function() {
+    it ('by adding contents of given file to bundle', function(done) {
+      var fakeFile = createFakeFile('add.js', fs.readFileSync('test/fixtures/add.js'))
+      var opts = { add: ['./add_file']};
+
+      gulpB(opts).once('data', function(bundled){
+        var sandbox = {addValue: 0}
+
+        vm.runInNewContext(bundled.contents.toString('utf8'), sandbox);
+
+        expect(sandbox.addValue).to.equal(100)
         done();
 
       }).end(fakeFile);
@@ -106,7 +123,7 @@ describe('gulp-browserify', function() {
         expect(bundled.contents.toString()).to.not.match(/bar: 'Bar!'/);
         done();
       }).end(fakeFile);
-    });   
+    });
     it ('when specified as a list', function(done) {
       var fakeFile = createFakeFile('ignore.js', fs.readFileSync('test/fixtures/extension.js'));
       var opts = { extensions: ['.foo', '.bar'], ignore: ['./ext_foo','./ext_bar']};
@@ -115,7 +132,7 @@ describe('gulp-browserify', function() {
         expect(bundled.contents.toString()).to.not.match(/bar: 'Bar!'/);
         done();
       }).end(fakeFile);
-    });   
+    });
   });
 
   it('should return a browserify require file without entry point contents', function(done) {
