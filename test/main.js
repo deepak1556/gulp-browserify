@@ -3,6 +3,7 @@ var path = require('path');
 var gutil = require('gulp-util');
 var coffeeify = require('coffeeify');
 var expect = require('chai').expect;
+var vm = require('vm')
 
 var gulpB = require('../');
 var prepare = require('./prepare');
@@ -18,7 +19,7 @@ function createFakeFile(filename, contents) {
 
 describe('gulp-browserify', function() {
   before(function (done) {
-    prepare(['normal.js', 'normal2.js'], done);
+    prepare(['normal.js', 'normal2.js', 'exclude.js'], done);
   });
 
   it('should return files', function(done) {
@@ -54,6 +55,68 @@ describe('gulp-browserify', function() {
       done();
     }).end(fakeFile);
 	});
+
+  describe ('it should handle the external option', function() {
+    it ('when specified as a string', function(done) {
+      var fakeFile = createFakeFile('external.js', fs.readFileSync('test/fixtures/extension.js'));
+      var opts = { extensions: ['.foo', '.bar'], external: './ext_bar'};
+      gulpB(opts).once('data', function(bundled){
+        expect(bundled.contents.toString()).to.match(/foo: 'Foo!'/);
+        expect(bundled.contents.toString()).to.not.match(/bar: 'Bar!'/);
+        done();
+      }).end(fakeFile);
+    });
+
+    it ('when specified as an array', function(done) {
+      var fakeFile = createFakeFile('external.js', fs.readFileSync('test/fixtures/extension.js'));
+      var opts = { extensions: ['.foo', '.bar'], external: ['./ext_bar', './ext_foo']};
+      gulpB(opts).once('data', function(bundled){
+        expect(bundled.contents.toString()).to.not.match(/foo: 'Foo!'/);
+        expect(bundled.contents.toString()).to.not.match(/bar: 'Bar!'/);
+        done();
+      }).end(fakeFile);
+    });
+  })
+
+  describe ('it should handle the exclude option', function() {
+    it ('by throwing an error on invalid requires', function(done) {
+      var fakeFile = createFakeFile('exclude.js', fs.readFileSync('test/fixtures/exclude.js'))
+      var opts = { exclude: ['./increment']};
+
+      gulpB(opts).once('data', function(bundled){
+        sandbox = {value: 20}
+
+        expect(function() {
+        vm.runInNewContext(bundled.contents.toString('utf8'), sandbox)
+        }).to.throw("Cannot find module './increment'");
+
+        expect(sandbox.value).to.equal(20)
+        done();
+
+      }).end(fakeFile);
+    });
+  });
+
+  describe ('it should handle the ignore option', function() {
+    it ('when specified as a string', function(done) {
+      var fakeFile = createFakeFile('ignore.js', fs.readFileSync('test/fixtures/extension.js'));
+      var opts = { extensions: ['.foo', '.bar'], ignore: './ext_bar'};
+      gulpB(opts).once('data', function(bundled){
+        expect(bundled.contents.toString()).to.match(/foo: 'Foo!'/);
+        expect(bundled.contents.toString()).to.not.match(/bar: 'Bar!'/);
+        done();
+      }).end(fakeFile);
+    });   
+    it ('when specified as a list', function(done) {
+      var fakeFile = createFakeFile('ignore.js', fs.readFileSync('test/fixtures/extension.js'));
+      var opts = { extensions: ['.foo', '.bar'], ignore: ['./ext_foo','./ext_bar']};
+      gulpB(opts).once('data', function(bundled){
+        expect(bundled.contents.toString()).to.not.match(/foo: 'Foo!'/);
+        expect(bundled.contents.toString()).to.not.match(/bar: 'Bar!'/);
+        done();
+      }).end(fakeFile);
+    });   
+  });
 
   it('should return a browserify require file without entry point contents', function(done) {
     var fakeFile = createFakeFile('normal.js', null);
