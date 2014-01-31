@@ -46,7 +46,7 @@ module.exports = function(opts, data) {
       data.entries = arrayStream([file.contents]);
     }
 
-    data.basedir = file.base;
+    data.basedir = path.dirname(file.path);
 
     var bundler = browserify(data);
 
