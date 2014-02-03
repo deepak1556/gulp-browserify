@@ -7,6 +7,8 @@ var path = require('path');
 var util = require('util');
 var Readable = require('stream').Readable || require('readable-stream');
 
+const PLUGIN_NAME = 'gulp-browserify';
+
 function arrayStream(items) {
   var index = 0;
   var readable = new Readable({objectMode: true});
@@ -35,7 +37,10 @@ module.exports = function(opts, data) {
   function transform(file, enc, cb) {
     var self = this;
 
-    if (file.isStream()) return cb(new Error('Streams not supported'));
+    if (file.isStream()) {
+      self.emit('error', new PluginError(PLUGIN_NAME, 'Streams not supported'));
+      return cb();
+    }
 
     // browserify accepts file path or stream.
 
@@ -58,7 +63,10 @@ module.exports = function(opts, data) {
       bundler = shim(bundler, opts.shim);
     }
 
-    bundler.on('error', cb);
+    bundler.on('error', function(err) {
+      self.emit('error', new PluginError(PLUGIN_NAME, err));
+      cb();
+    });
 
     if(opts.transform) opts.transform.forEach(function(transform) {
       bundler.transform(transform);
@@ -68,7 +76,7 @@ module.exports = function(opts, data) {
 
     var bStream = bundler.bundle(opts, function(err, src) {
       if(err) {
-        self.emit('error', new PluginError('gulp-browserify', err));
+        self.emit('error', new PluginError(PLUGIN_NAME, err));
       } else {
         self.emit('postbundle', src);
 
