@@ -1,10 +1,13 @@
 var through = require('through2');
 var gutil = require('gulp-util');
+var PluginError = gutil.PluginError;
 var browserify = require('browserify');
 var shim = require('browserify-shim');
 var path = require('path');
 var util = require('util');
 var Readable = require('stream').Readable || require('readable-stream');
+
+const PLUGIN_NAME = 'gulp-browserify';
 
 function arrayStream(items) {
   var index = 0;
@@ -34,7 +37,10 @@ module.exports = function(opts, data) {
   function transform(file, enc, cb) {
     var self = this;
 
-    if (file.isStream()) return cb(new Error('Streams not supported'));
+    if (file.isStream()) {
+      self.emit('error', new PluginError(PLUGIN_NAME, 'Streams not supported'));
+      return cb();
+    }
 
     // browserify accepts file path or stream.
 
@@ -57,7 +63,10 @@ module.exports = function(opts, data) {
       bundler = shim(bundler, opts.shim);
     }
 
-    bundler.on('error', cb);
+    bundler.on('error', function(err) {
+      self.emit('error', new PluginError(PLUGIN_NAME, err));
+      cb();
+    });
 
     ['exclude', 'add', 'external', 'transform', 'ignore'].forEach( function(method) {
       if (!opts[method]) return;
@@ -70,13 +79,14 @@ module.exports = function(opts, data) {
 
     var bStream = bundler.bundle(opts, function(err, src) {
       if(err) {
-        return cb(err);
+        self.emit('error', new PluginError(PLUGIN_NAME, err));
+      } else {
+        self.emit('postbundle', src);
+
+        file.contents = new Buffer(src);
+        self.push(file);
       }
-
-      self.emit('postbundle', src);
-
-      file.contents = new Buffer(src);
-      self.push(file);
+      
       cb();
     });
   }
