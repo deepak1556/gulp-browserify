@@ -122,9 +122,7 @@ describe('gulp-browserify', function() {
       gulpB(opts).once('data', function(bundled){
         var sandbox = {addValue: 0}
 
-        console.log('== ' + bundled.contents.toString('utf8'));
-
-        expect(bundled.contents.toString('utf8') + '\n').to.equal(fs.readFileSync('test/expected/test.js', 'utf8'));
+        expect(vm.runInNewContext(bundled.contents.toString('utf8') + '; var test = require(\'test\'); test.test();', sandbox)).to.equal('test');
 
         done();
 
