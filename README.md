@@ -121,14 +121,15 @@ See [node-browserfy](https://github.com/substack/node-browserify#brequirefile-op
 
 ```javascript
 gulp.task('browserify', function () {
-  gulp.src(['./public/js/modules/**/*.js'])
+  gulp.src(['./test.js'])
     .pipe(browserify({
         require: ['expose']
       })) 
-      .pipe(concat('modules.js'))
-      .pipe(gulp.dest('./public/js/'));
+      .pipe(gulp.dest('./modules/'));
 });
 ```
+
+The above code will convert `/test.js` into `/modules/test.js`. Once included on a page via a script tag, can be loaded by `require('./modules/test.js')`
 
 #### Other Options
 
