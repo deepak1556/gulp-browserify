@@ -68,12 +68,37 @@ module.exports = function(opts, data) {
       cb();
     });
 
+/*
     ['exclude', 'add', 'external', 'transform', 'ignore'].forEach( function(method) {
       if (!opts[method]) return;
       [].concat(opts[method]).forEach(function (args) {
         bundler[method].apply(bundler, [].concat(args));
       })
     })
+*/
+
+
+    ['exclude', 'add', 'external', 'transform', 'ignore', 'require'].forEach( function(method) {
+      if (!opts[method]) return;
+      console.log('-- method: ' + method); 
+      if (method == 'require') {
+        var args = [].concat(opts[method]);
+        console.log('  -- len: ' + args.length + ' : \'' + args[0] + '\'');
+        if(args.length > 0 && args[0] == 'expose') {
+          var exportName = path.basename(file.path, path.extname(file.path));
+          console.log('  -- expose: ' + exportName);
+          bundler[method].apply(bundler, [file.path, {expose: exportName}]);
+        } else {
+          console.log('  -- No expose');
+          bundler[method].apply(bundler, [file.path]);
+        }
+      } else {
+        [].concat(opts[method]).forEach(function (args) {
+          bundler[method].apply(bundler, [].concat(args));
+        })
+      }
+    })
+
 
     self.emit('prebundle', bundler);
 
