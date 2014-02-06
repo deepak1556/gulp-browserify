@@ -111,6 +111,25 @@ Custom module name resolution function. From [node-browserify](https://github.co
 
 Obviously, this function must implement the same API as [browser-resolve](https://npmjs.org/package/browser-resolve).
 
+#### require
+
+Type: `[String]`
+
+Exposes a module to be accessed from outside the module file using `require(file)`. Uses the filename as the exposed module name.
+
+See [node-browserfy](https://github.com/substack/node-browserify#brequirefile-opts) documentation for more info.
+
+```javascript
+gulp.task('browserify', function () {
+  gulp.src(['./public/js/modules/**/*.js'])
+    .pipe(browserify({
+        require: ['expose']
+      })) 
+      .pipe(concat('modules.js'))
+      .pipe(gulp.dest('./public/js/'));
+});
+```
+
 #### Other Options
 
 Any other options you provide will be passed through to browserify. This is useful for setting things like `standalone` or `ignoreGlobals`.
