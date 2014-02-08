@@ -76,7 +76,7 @@ describe('gulp-browserify', function() {
         done();
       }).end(fakeFile);
     });
-  })
+  });
 
   describe ('it should handle the exclude option', function() {
     it ('by throwing an error on invalid requires', function(done) {
@@ -84,32 +84,30 @@ describe('gulp-browserify', function() {
       var opts = { exclude: ['./increment']};
 
       gulpB(opts).once('data', function(bundled){
-        var sandbox = {value: 20}
+        var sandbox = {value: 20};
 
         expect(function() {
-        vm.runInNewContext(bundled.contents.toString('utf8'), sandbox)
+          vm.runInNewContext(bundled.contents.toString('utf8'), sandbox);
         }).to.throw("Cannot find module './increment'");
 
         expect(sandbox.value).to.equal(20)
         done();
-
       }).end(fakeFile);
     });
   });
 
   describe ('it should handle the add option', function() {
     it ('by adding contents of given file to bundle', function(done) {
-      var fakeFile = createFakeFile('add.js', fs.readFileSync('test/fixtures/add.js'))
-      var opts = { add: ['./add_file']};
+      var fakeFile = createFakeFile('add.js', fs.readFileSync('test/fixtures/add.js'));
+      var opts = { add: ['./add_file'] };
 
       gulpB(opts).once('data', function(bundled){
-        var sandbox = {addValue: 0}
+        var sandbox = {addValue: 0};
 
         vm.runInNewContext(bundled.contents.toString('utf8'), sandbox);
 
-        expect(sandbox.addValue).to.equal(100)
+        expect(sandbox.addValue).to.equal(100);
         done();
-
       }).end(fakeFile);
     });
   });
@@ -130,6 +128,35 @@ describe('gulp-browserify', function() {
       gulpB(opts).once('data', function(bundled){
         expect(bundled.contents.toString()).to.not.match(/foo: 'Foo!'/);
         expect(bundled.contents.toString()).to.not.match(/bar: 'Bar!'/);
+        done();
+      }).end(fakeFile);
+    });
+  });
+
+  describe ('it should handle the require option', function() {
+    it ('when specified as a string', function(done) {
+      var fakeFile = createFakeFile('ignore.js', fs.readFileSync('test/fixtures/extension.js'));
+      var opts = { extensions: ['.foo', '.bar'], require: './ext_bar' };
+      gulpB(opts).once('data', function(bundled){
+        expect(bundled.contents.toString()).to.match(/foo: 'Foo!'/);
+        expect(bundled.contents.toString()).to.match(/bar: 'Bar!'/);
+        expect(bundled.contents.toString()).to.match(/^require=/);
+        expect(bundled.contents.toString()).to.match(/".\/ext_bar"\:/);
+        done();
+      }).end(fakeFile);
+    });
+    it ('when specified as a list', function(done) {
+      var fakeFile = createFakeFile('ignore.js', fs.readFileSync('test/fixtures/extension.js'));
+      var opts = {
+        extensions: ['.foo', '.bar'],
+        require: [['./ext_foo', { expose: 'foo' }], ['./ext_bar', { expose: 'bar' }]]
+      };
+      gulpB(opts).once('data', function(bundled){
+        expect(bundled.contents.toString()).to.match(/foo: 'Foo!'/);
+        expect(bundled.contents.toString()).to.match(/bar: 'Bar!'/);
+        expect(bundled.contents.toString()).to.match(/^require=/);
+        expect(bundled.contents.toString()).to.match(/"foo"\:/);
+        expect(bundled.contents.toString()).to.match(/"bar"\:/);
         done();
       }).end(fakeFile);
     });
