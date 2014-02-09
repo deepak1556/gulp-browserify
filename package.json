@@ -11,7 +11,7 @@
     "Shuhei Kagawa <shuhei.kagawa@gmail.com>"
   ],
   "dependencies": {
-    "browserify": "~3.20.0",
+    "browserify": "3.x",
     "gulp-util": "~2.2.5",
     "browserify-shim": "~2.0.10",
     "readable-stream": "~1.1.10",
@@ -22,12 +22,12 @@
     "node": ">= 0.9"
   },
   "scripts": {
-    "test": "mocha"
+    "test": "./node_modules/.bin/mocha"
   },
   "devDependencies": {
-    "mocha": "~1.15.1",
-    "chai": "~1.8.1",
-    "coffeeify": "~0.5.2"
+    "mocha": "~1.17.1",
+    "chai": "~1.9.0",
+    "coffeeify": "~0.6.0"
   },
   "keywords": [
     "gulpplugin",
