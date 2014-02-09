@@ -1,6 +1,6 @@
 {
   "name": "gulp-browserify",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "description": "Bundle modules with Browserify",
   "license": "MIT",
   "repository": "https://github.com/deepak1556/gulp-browserify",
