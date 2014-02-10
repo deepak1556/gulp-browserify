@@ -112,6 +112,22 @@ describe('gulp-browserify', function() {
     });
   });
 
+  describe ('it should handle the require(expose) option', function() {
+    it ('by adding contents of given file to bundle', function(done) {
+      var fakeFile = createFakeFile('test.js', fs.readFileSync('test/fixtures/test.js'))
+      var opts = { require: ['expose']};
+
+      gulpB(opts).once('data', function(bundled){
+        var sandbox = {addValue: 0}
+
+        expect(vm.runInNewContext(bundled.contents.toString('utf8') + '; var test = require(\'test\'); test.test();', sandbox)).to.equal('test');
+
+        done();
+
+      }).end(fakeFile);
+    });
+  });
+
   describe ('it should handle the ignore option', function() {
     it ('when specified as a string', function(done) {
       var fakeFile = createFakeFile('ignore.js', fs.readFileSync('test/fixtures/extension.js'));

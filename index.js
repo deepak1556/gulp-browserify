@@ -70,9 +70,19 @@ module.exports = function(opts, data) {
 
     ['exclude', 'add', 'external', 'transform', 'ignore', 'require'].forEach( function(method) {
       if (!opts[method]) return;
-      [].concat(opts[method]).forEach(function (args) {
-        bundler[method].apply(bundler, [].concat(args));
-      })
+      if (method == 'require') {
+        var args = [].concat(opts[method]);
+        if(args.length > 0 && args[0] == 'expose') {
+          var exportName = path.basename(file.path, path.extname(file.path));
+          bundler[method].apply(bundler, [file.path, {expose: exportName}]);
+        } else {
+          bundler[method].apply(bundler, [file.path]);
+        }
+      } else {
+        [].concat(opts[method]).forEach(function (args) {
+          bundler[method].apply(bundler, [].concat(args));
+        })
+      }
     })
 
     self.emit('prebundle', bundler);
