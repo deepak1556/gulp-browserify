@@ -290,12 +290,30 @@ describe('gulp-browserify', function() {
     }).end(fakeFile);
   });
 
-  it('should emit error when bundle throws error', function(done) {
+  it('should emit an error when bundle throws a standard error', function(done) {
+    var fakeFile = createFakeFile('not_found.js', new Buffer('require("--non-existent");'));
+    gulpB().once('error', function (err) {
+      expect(err).to.exist;
+      expect(err).to.be.instanceof(gutil.PluginError);
+      expect(err.message).to.include('module "--non-existent" not found');
+      expect(err.stack).to.exist;
+      expect(err.plugin).to.eq('gulp-browserify');
+      expect(err.name).to.eq('Error');
+      done();
+    }).end(fakeFile);
+  });
+
+  it('should emit an error with file name and line number when bundle throws a syntax error', function(done) {
     var fakeFile = createFakeFile('trans_error.coffee', null);
     var opts = { transform: ['coffeeify'], extensions: ['.coffee'] };
     gulpB(opts).once('error', function (err) {
       expect(err).to.exist;
       expect(err).to.be.instanceof(gutil.PluginError);
+      expect(err.message).to.include('test/fixtures/trans_error.coffee:2');
+      expect(err.message).to.include('ParseError: unexpected ');
+      expect(err.stack).to.exist;
+      expect(err.plugin).to.eq('gulp-browserify');
+      expect(err.name).to.eq('SyntaxError');
       done();
     }).end(fakeFile);
   });

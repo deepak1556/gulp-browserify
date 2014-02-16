@@ -23,6 +23,20 @@ function arrayStream(items) {
   return readable;
 }
 
+function wrapWithPluginError(originalError) {
+  // Use annotated message of ParseError if available.
+  // https://github.com/substack/node-syntax-error
+  var message = originalError.annotated || originalError.message;
+  // Copy original properties that PluginError uses.
+  var opts = {
+    name: originalError.name,
+    stack: originalError.stack,
+    fileName: originalError.fileName,
+    lineNumber: originalError.lineNumber
+  };
+  return new PluginError(PLUGIN_NAME, message, opts);
+}
+
 module.exports = function(opts, data) {
   if(!opts) opts = {};
   if(!data) data = {};
@@ -64,7 +78,7 @@ module.exports = function(opts, data) {
     }
 
     bundler.on('error', function(err) {
-      self.emit('error', new PluginError(PLUGIN_NAME, err));
+      self.emit('error', wrapWithPluginError(err));
       cb();
     });
 
@@ -79,7 +93,7 @@ module.exports = function(opts, data) {
 
     var bStream = bundler.bundle(opts, function(err, src) {
       if(err) {
-        self.emit('error', new PluginError(PLUGIN_NAME, err));
+        self.emit('error', wrapWithPluginError(err));
       } else {
         self.emit('postbundle', src);
 
