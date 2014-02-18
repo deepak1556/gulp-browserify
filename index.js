@@ -24,16 +24,23 @@ function arrayStream(items) {
 }
 
 function wrapWithPluginError(originalError) {
-  // Use annotated message of ParseError if available.
-  // https://github.com/substack/node-syntax-error
-  var message = originalError.annotated || originalError.message;
-  // Copy original properties that PluginError uses.
-  var opts = {
-    name: originalError.name,
-    stack: originalError.stack,
-    fileName: originalError.fileName,
-    lineNumber: originalError.lineNumber
-  };
+  var message, opts;
+
+  if ('string' === typeof originalError) {
+    message = originalError;
+  } else {
+    // Use annotated message of ParseError if available.
+    // https://github.com/substack/node-syntax-error
+    message = originalError.annotated || originalError.message;
+    // Copy original properties that PluginError uses.
+    opts = {
+      name: originalError.name,
+      stack: originalError.stack,
+      fileName: originalError.fileName,
+      lineNumber: originalError.lineNumber
+    };
+  }
+
   return new PluginError(PLUGIN_NAME, message, opts);
 }
 
@@ -100,7 +107,7 @@ module.exports = function(opts, data) {
         file.contents = new Buffer(src);
         self.push(file);
       }
-      
+
       cb();
     });
   }
