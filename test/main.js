@@ -4,6 +4,7 @@ var gutil = require('gulp-util');
 var coffeeify = require('coffeeify');
 var expect = require('chai').expect;
 var vm = require('vm')
+var through = require('through2');
 
 var gulpB = require('../');
 var prepare = require('./prepare');
@@ -314,6 +315,25 @@ describe('gulp-browserify', function() {
       expect(err.stack).to.exist;
       expect(err.plugin).to.eq('gulp-browserify');
       expect(err.name).to.eq('SyntaxError');
+      done();
+    }).end(fakeFile);
+  });
+
+  it('should emit an error when bundle throws a plain string as an error', function(done) {
+    var fakeFile = createFakeFile('some.js', new Buffer('console.log("something");'));
+    function stringErrorTransform(file) {
+      return through(function (chunk, encoding, callback) {
+        callback('string error!');
+      });
+    }
+    var opts = { transform: [stringErrorTransform], extensions: ['.coffee'] };
+    gulpB(opts).once('error', function (err) {
+      expect(err).to.exist;
+      expect(err).to.be.instanceof(gutil.PluginError);
+      expect(err.message).to.eq('string error!');
+      expect(err.plugin).to.eq('gulp-browserify');
+      expect(err.stack).to.exist;
+      expect(err.name).to.eq('Error');
       done();
     }).end(fakeFile);
   });
