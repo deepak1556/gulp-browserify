@@ -68,6 +68,7 @@ Let's say you want to browserify CoffeeScript, install `coffeeify` and:
 ```javascript
 var gulp = require('gulp');
 var browserify = require('gulp-browserify');
+var rename = require('gulp-rename');
 
 gulp.task('coffee', function() {
   gulp.src('src/coffee/app.coffee', { read: false })
@@ -75,6 +76,7 @@ gulp.task('coffee', function() {
       transform: ['coffeeify'],
       extensions: ['.coffee']
     }))
+    .pipe(rename('app.js'))
     .pipe(gulp.dest('./build/js'))
 });
 ```
