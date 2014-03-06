@@ -75,7 +75,7 @@ module.exports = function(opts, data){
 
     data.basedir = path.dirname(file.path);
 
-    var bundler = browserify(data);
+    var bundler = browserify(data, opts);
 
     if(opts.shim) {
       for(var lib in opts.shim) {
