@@ -45,8 +45,8 @@ function wrapWithPluginError(originalError){
 }
 
 module.exports = function(opts, data){
-  if(!opts) opts = {};
-  if(!data) data = {};
+  opts = opts || {};
+  data = data || {};
 
   ['noParse', 'extensions', 'resolve'].forEach(function(opt){
     if(opts[opt]) {
