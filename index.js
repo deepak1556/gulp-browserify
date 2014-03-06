@@ -89,7 +89,14 @@ module.exports = function(opts, data){
       cb();
     });
 
-    ['exclude', 'add', 'external', 'transform', 'ignore', 'require'].forEach( function(method) {
+    [
+      'exclude',
+      'add',
+      'external',
+      'transform',
+      'ignore',
+      'require'
+    ].forEach( function(method) {
       if (!opts[method]) return;
       [].concat(opts[method]).forEach(function (args) {
         bundler[method].apply(bundler, [].concat(args));
