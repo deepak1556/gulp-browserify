@@ -11,7 +11,7 @@ const PLUGIN_NAME = 'gulp-browserify';
 
 function arrayStream(items) {
   var index = 0;
-  var readable = new Readable({objectMode: true});
+  var readable = new Readable({ objectMode: true });
   readable._read = function() {
     if(index < items.length) {
       readable.push(items[index]);
@@ -23,7 +23,7 @@ function arrayStream(items) {
   return readable;
 }
 
-function wrapWithPluginError(originalError) {
+function wrapWithPluginError(originalError){
   var message, opts;
 
   if ('string' === typeof originalError) {
@@ -44,18 +44,18 @@ function wrapWithPluginError(originalError) {
   return new PluginError(PLUGIN_NAME, message, opts);
 }
 
-module.exports = function(opts, data) {
+module.exports = function(opts, data){
   if(!opts) opts = {};
   if(!data) data = {};
 
-  ['noParse', 'extensions', 'resolve'].forEach(function(opt) {
+  ['noParse', 'extensions', 'resolve'].forEach(function(opt){
     if(opts[opt]) {
       data[opt] = opts[opt];
       delete opts[opt];
     }
   });
 
-  function transform(file, enc, cb) {
+  function transform(file, enc, cb){
     var self = this;
 
     if (file.isStream()) {
@@ -93,12 +93,12 @@ module.exports = function(opts, data) {
       if (!opts[method]) return;
       [].concat(opts[method]).forEach(function (args) {
         bundler[method].apply(bundler, [].concat(args));
-      })
-    })
+      });
+    });
 
     self.emit('prebundle', bundler);
 
-    var bStream = bundler.bundle(opts, function(err, src) {
+    var bStream = bundler.bundle(opts, function(err, src){
       if(err) {
         self.emit('error', wrapWithPluginError(err));
       } else {
@@ -111,5 +111,6 @@ module.exports = function(opts, data) {
       cb();
     });
   }
+
   return through.obj(transform);
 };
