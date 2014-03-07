@@ -117,6 +117,24 @@ Obviously, this function must implement the same API as [browser-resolve](https:
 
 Any other options you provide will be passed through to browserify. This is useful for setting things like `standalone` or `ignoreGlobals`.
 
+### Custom options
+
+#### nobuiltins
+
+Remove builtins modules defined in `lib/builtins.js` (browserify module).
+`opts.builtins` must be not defined and `opts.nobuiltins` can be an Array of
+Strings or simply a String.
+
+```js
+gulp.task('scripts', function() {
+  gulp.src(['src/index.js'])
+    .pipe(browserify({
+      nobuiltins: 'events querystring'
+    }))
+    .pipe(gulp.dest('./build/js'))
+});
+```
+
 ### Browserify-Shim
 
 Example configuration

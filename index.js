@@ -11,7 +11,7 @@ const PLUGIN_NAME = 'gulp-browserify';
 
 function arrayStream(items) {
   var index = 0;
-  var readable = new Readable({objectMode: true});
+  var readable = new Readable({ objectMode: true });
   readable._read = function() {
     if(index < items.length) {
       readable.push(items[index]);
@@ -23,7 +23,7 @@ function arrayStream(items) {
   return readable;
 }
 
-function wrapWithPluginError(originalError) {
+function wrapWithPluginError(originalError){
   var message, opts;
 
   if ('string' === typeof originalError) {
@@ -44,18 +44,18 @@ function wrapWithPluginError(originalError) {
   return new PluginError(PLUGIN_NAME, message, opts);
 }
 
-module.exports = function(opts, data) {
-  if(!opts) opts = {};
-  if(!data) data = {};
+module.exports = function(opts, data){
+  opts = opts || {};
+  data = data || {};
 
-  ['noParse', 'extensions', 'resolve'].forEach(function(opt) {
+  ['noParse', 'extensions', 'resolve'].forEach(function(opt){
     if(opts[opt]) {
       data[opt] = opts[opt];
       delete opts[opt];
     }
   });
 
-  function transform(file, enc, cb) {
+  function transform(file, enc, cb){
     var self = this;
 
     if (file.isStream()) {
@@ -75,7 +75,20 @@ module.exports = function(opts, data) {
 
     data.basedir = path.dirname(file.path);
 
-    var bundler = browserify(data);
+    // nobuiltins option
+    if (!opts.builtins && opts.nobuiltins) {
+      var nob = opts.nobuiltins;
+      var builtins = require('./node_modules/browserify/lib/builtins.js');
+      nob = 'string' == typeof nob ? nob.split(' ') : nob;
+
+      for (var i = 0; i < nob.length; i++) {
+        delete builtins[nob[i]];
+      };
+
+      opts.builtins = builtins;
+    }
+
+    var bundler = browserify(data, opts);
 
     if(opts.shim) {
       for(var lib in opts.shim) {
@@ -89,16 +102,23 @@ module.exports = function(opts, data) {
       cb();
     });
 
-    ['exclude', 'add', 'external', 'transform', 'ignore', 'require'].forEach( function(method) {
+    [
+      'exclude',
+      'add',
+      'external',
+      'transform',
+      'ignore',
+      'require'
+    ].forEach( function(method) {
       if (!opts[method]) return;
       [].concat(opts[method]).forEach(function (args) {
         bundler[method].apply(bundler, [].concat(args));
-      })
-    })
+      });
+    });
 
     self.emit('prebundle', bundler);
 
-    var bStream = bundler.bundle(opts, function(err, src) {
+    var bStream = bundler.bundle(opts, function(err, src){
       if(err) {
         self.emit('error', wrapWithPluginError(err));
       } else {
@@ -111,5 +131,6 @@ module.exports = function(opts, data) {
       cb();
     });
   }
+
   return through.obj(transform);
 };
