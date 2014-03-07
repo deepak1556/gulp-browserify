@@ -75,6 +75,19 @@ module.exports = function(opts, data){
 
     data.basedir = path.dirname(file.path);
 
+    // nobuiltins option
+    if (!opts.builtins && opts.nobuiltins) {
+      var nob = opts.nobuiltins;
+      var builtins = require('./node_modules/browserify/lib/builtins.js');
+      nob = 'string' == typeof nob ? nob.split(' ') : nob;
+
+      for (var i = 0; i < nob.length; i++) {
+        delete builtins[nob[i]];
+      };
+
+      opts.builtins = builtins;
+    }
+
     var bundler = browserify(data, opts);
 
     if(opts.shim) {
