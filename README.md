@@ -1,3 +1,5 @@
+###NOTE: THIS PLUGIN HAS BEEN [BLACKLISTED](https://github.com/gulpjs/plugins/issues/47)
+
 [![Build Status](https://travis-ci.org/deepak1556/gulp-browserify.png)](https://travis-ci.org/deepak1556/gulp-browserify)
 [![NPM version](https://badge.fury.io/js/gulp-browserify.png)](http://badge.fury.io/js/gulp-browserify)
 
