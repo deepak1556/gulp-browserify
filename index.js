@@ -5,7 +5,10 @@ var browserify = require('browserify');
 var shim = require('browserify-shim');
 var path = require('path');
 var util = require('util');
+var fs = require('fs');
 var Readable = require('stream').Readable || require('readable-stream');
+
+var depCache = {};
 
 const PLUGIN_NAME = 'gulp-browserify';
 
@@ -44,6 +47,29 @@ function wrapWithPluginError(originalError){
   return new PluginError(PLUGIN_NAME, message, opts);
 }
 
+function addDependency(file) {
+    depCache[this.path].push(file.id);
+}
+
+function isNewer(srcFile, destFile) {
+    var f;
+
+    if (!depCache[srcFile]) {
+        return true;
+    }
+
+    for (f in depCache[srcFile]) {
+        try {
+            var srcStat = fs.statSync(depCache[srcFile][f]);
+            var destStat = fs.statSync(destFile);
+            if (srcStat.mtime > destStat.mtime) {
+                return true;
+            }
+        } catch (e) {}
+    }
+    return false;
+}
+
 module.exports = function(opts, data){
   opts = opts || {};
   data = data || {};
@@ -55,8 +81,14 @@ module.exports = function(opts, data){
     }
   });
 
+
   function transform(file, enc, cb){
     var self = this;
+    var dest;
+
+    if (opts.dest) {
+      dest = path.join(opts.dest, file.relative);
+    }
 
     if (file.isStream()) {
       self.emit('error', new PluginError(PLUGIN_NAME, 'Streams not supported'));
@@ -73,8 +105,13 @@ module.exports = function(opts, data){
       data.entries = arrayStream([file.contents]);
     }
 
+    if (!isNewer(file.path, dest)) {
+        return cb();
+    }
+
     data.basedir = opts.basedir = path.dirname(file.path);
 
+    depCache[file.path] = [];
     // nobuiltins option
     if (!opts.builtins && opts.nobuiltins) {
       var nob = opts.nobuiltins;
@@ -89,6 +126,7 @@ module.exports = function(opts, data){
     }
 
     var bundler = browserify(data, opts);
+    bundler.on('dep', addDependency.bind(file));
 
     if(opts.shim) {
       for(var lib in opts.shim) {
