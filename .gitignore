@@ -3,3 +3,4 @@ npm-debug.log
 .jshintrc
 .editorconfig
 test/expected/*.js
+.idea

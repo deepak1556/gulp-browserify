@@ -73,7 +73,7 @@ module.exports = function(opts, data){
       data.entries = arrayStream([file.contents]);
     }
 
-    data.basedir = path.dirname(file.path);
+    data.basedir = opts.basedir = path.dirname(file.path);
 
     // nobuiltins option
     if (!opts.builtins && opts.nobuiltins) {
