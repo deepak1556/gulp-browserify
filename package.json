@@ -15,7 +15,8 @@
     "gulp-util": "~2.2.5",
     "browserify-shim": "~2.0.10",
     "readable-stream": "~1.1.10",
-    "through2": "~0.4.0"
+    "through2": "~0.4.0",
+    "shallow-copy": "0.0.1"
   },
   "main": "index.js",
   "engines": {

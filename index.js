@@ -2,6 +2,7 @@ var through = require('through2');
 var gutil = require('gulp-util');
 var PluginError = gutil.PluginError;
 var browserify = require('browserify');
+var copy = require('shallow-copy');
 var shim = require('browserify-shim');
 var path = require('path');
 var util = require('util');
@@ -9,6 +10,7 @@ var fs = require('fs');
 var Readable = require('stream').Readable || require('readable-stream');
 
 var depCache = {};
+var cache = {};
 
 const PLUGIN_NAME = 'gulp-browserify';
 
@@ -49,6 +51,7 @@ function wrapWithPluginError(originalError){
 
 function addDependency(file) {
     depCache[this.path].push(file.id);
+    cache[file.id] = file;
 }
 
 function isNewer(srcFile, destFile) {
@@ -156,6 +159,13 @@ module.exports = function(opts, data){
 
     self.emit('prebundle', bundler);
 
+    // Cache dependency info when building multiple files to speed up bundling
+    var bundle = bundler.bundle.bind(bundler);
+    bundler.bundle = function (opts_, cb) {
+        opts_.cache = cache;
+        bundle(opts_, cb);
+    };
+
     var bStream = bundler.bundle(opts, function(err, src){
       if(err) {
         self.emit('error', wrapWithPluginError(err));
@@ -170,5 +180,8 @@ module.exports = function(opts, data){
     });
   }
 
-  return through.obj(transform);
+  return through.obj(transform, function () {
+      cache = {};
+      this.emit('end');
+  });
 };
