@@ -97,7 +97,7 @@ Type: `[String]`
 
 Array of extensions that you want to skip in `require()` calls in addition to `.js` and `.json`. Don't forget `.`.
 
-With `{ extensions: ['.coffee'] }`, you can do `require('app')`. Instead, you have to do `require('app.coffee')`.
+With `{ extensions: ['.coffee'] }`, you can't do `require('app')`. Instead, you have to do `require('app.coffee')`.
 
 #### ignore
 Type: `[String]`
