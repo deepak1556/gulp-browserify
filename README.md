@@ -1,9 +1,9 @@
-##NOTE: THIS PLUGIN IS NO LONGER MAINTAINED , checkout the [recipes](https://github.com/gulpjs/gulp/tree/master/docs/recipes) by gulp team for reference on using browserify with gulp.
+## NOTE: THIS PLUGIN IS NO LONGER MAINTAINED , checkout the [recipes](https://github.com/gulpjs/gulp/tree/master/docs/recipes) by gulp team for reference on using browserify with gulp.
 
 [![Build Status](https://travis-ci.org/deepak1556/gulp-browserify.png)](https://travis-ci.org/deepak1556/gulp-browserify)
 [![NPM version](https://badge.fury.io/js/gulp-browserify.png)](http://badge.fury.io/js/gulp-browserify)
 
-#[gulp](https://github.com/gulpjs/gulp)-browserify
+# [gulp](https://github.com/gulpjs/gulp)-browserify
 
 <table>
 <tr>
@@ -205,7 +205,7 @@ Event triggered after the bundle process is over and provides the bundled data a
 
 
 
-#License
+# License
 
 Copyright (c) 2014 Robo (deepak1556) https://github.com/deepak1556
 
