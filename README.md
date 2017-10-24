@@ -1,4 +1,4 @@
-## NOTE: THIS PLUGIN IS NO LONGER MAINTAINED , checkout the [recipes](https://github.com/gulpjs/gulp/tree/master/docs/recipes) by gulp team for reference on using browserify with gulp.
+## NOTE: THIS PLUGIN IS NO LONGER MAINTAINED , checkout [gulp-bro](https://github.com/ngryman/gulp-bro) for a similar plugin, or the [recipes](https://github.com/gulpjs/gulp/tree/master/docs/recipes) by gulp team for reference on using browserify with gulp.
 
 [![Build Status](https://travis-ci.org/deepak1556/gulp-browserify.png)](https://travis-ci.org/deepak1556/gulp-browserify)
 [![NPM version](https://badge.fury.io/js/gulp-browserify.png)](http://badge.fury.io/js/gulp-browserify)
