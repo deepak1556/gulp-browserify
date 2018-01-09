@@ -45,7 +45,7 @@ function wrapWithPluginError(originalError){
 }
 
 module.exports = function(opts, data){
-  opts = opts || {};
+  opts = JSON.parse(JSON.stringify(opts || {})); // make deep copy, we are going to modify opts eventually
   data = data || {};
 
   ['noParse', 'extensions', 'resolve'].forEach(function(opt){
