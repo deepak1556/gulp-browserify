@@ -12,10 +12,11 @@
   ],
   "dependencies": {
     "browserify": "3.x",
-    "gulp-util": "~2.2.5",
     "browserify-shim": "~2.0.10",
+    "plugin-error": "^1.0.1",
     "readable-stream": "~1.1.10",
-    "through2": "~0.4.0"
+    "through2": "~0.4.0",
+    "vinyl": "^2.1.0"
   },
   "main": "index.js",
   "engines": {
@@ -25,9 +26,9 @@
     "test": "./node_modules/.bin/mocha"
   },
   "devDependencies": {
-    "mocha": "~1.17.1",
     "chai": "~1.9.0",
-    "coffeeify": "~0.6.0"
+    "coffeeify": "~0.6.0",
+    "mocha": "~1.17.1"
   },
   "keywords": [
     "gulpplugin",
