@@ -1,6 +1,7 @@
 var fs = require('fs');
 var path = require('path');
-var gutil = require('gulp-util');
+var File = require('vinyl');
+var PluginError = require('plugin-error');
 var coffeeify = require('coffeeify');
 var expect = require('chai').expect;
 var vm = require('vm')
@@ -10,7 +11,7 @@ var gulpB = require('../');
 var prepare = require('./prepare');
 
 function createFakeFile(filename, contents) {
-  return new gutil.File({
+  return new File({
     cwd: process.cwd(),
     base: path.join(__dirname, 'fixtures'),
     path: path.join(__dirname, 'fixtures', filename),
@@ -295,7 +296,7 @@ describe('gulp-browserify', function() {
     var fakeFile = createFakeFile('not_found.js', new Buffer('require("--non-existent");'));
     gulpB().once('error', function (err) {
       expect(err).to.exist;
-      expect(err).to.be.instanceof(gutil.PluginError);
+      expect(err).to.be.instanceof(PluginError);
       expect(err.message).to.include('module "--non-existent" not found');
       expect(err.stack).to.exist;
       expect(err.plugin).to.eq('gulp-browserify');
@@ -309,7 +310,7 @@ describe('gulp-browserify', function() {
     var opts = { transform: ['coffeeify'], extensions: ['.coffee'] };
     gulpB(opts).once('error', function (err) {
       expect(err).to.exist;
-      expect(err).to.be.instanceof(gutil.PluginError);
+      expect(err).to.be.instanceof(PluginError);
       expect(err.message).to.include('test/fixtures/trans_error.coffee:2');
       expect(err.message).to.include('ParseError: unexpected ');
       expect(err.stack).to.exist;
@@ -329,7 +330,7 @@ describe('gulp-browserify', function() {
     var opts = { transform: [stringErrorTransform], extensions: ['.coffee'] };
     gulpB(opts).once('error', function (err) {
       expect(err).to.exist;
-      expect(err).to.be.instanceof(gutil.PluginError);
+      expect(err).to.be.instanceof(PluginError);
       expect(err.message).to.eq('string error!');
       expect(err.plugin).to.eq('gulp-browserify');
       expect(err.stack).to.exist;

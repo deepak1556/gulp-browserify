@@ -1,6 +1,5 @@
 var through = require('through2');
-var gutil = require('gulp-util');
-var PluginError = gutil.PluginError;
+var PluginError = require('plugin-error');
 var browserify = require('browserify');
 var shim = require('browserify-shim');
 var path = require('path');
